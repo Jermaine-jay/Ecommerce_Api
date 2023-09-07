@@ -1,5 +1,11 @@
 
+using Ecommerce.Data.Context;
+using Ecommerce.Models.Entities;
 using Ecommerce_Api.Extensions;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.OpenApi.Models;
 
@@ -11,18 +17,49 @@ public class Program
 
         // Add services to the container.
 
-        string? connectionString =builder.Configuration.GetConnectionString("DefaultConnection");
+        string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
         builder.Services.RegisterDbContext(connectionString);
-
-        builder.Services.ConfigureIdentity();
-
+        builder.Services.RegisterServices();
+        //builder.Services.ConfigureIdentity(builder.Configuration);
+        //builder.Services.ConfigureAuth(builder.Configuration);
         builder.Services.AddControllers();
+        builder.Services.ConfigureCors();
+
+
+        builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(o =>
+        {
+            o.SignIn.RequireConfirmedAccount = false;
+            o.Password.RequireDigit = true;
+            o.Password.RequireLowercase = false;
+            o.Password.RequireUppercase = false;
+            o.Password.RequireNonAlphanumeric = false;
+            o.Password.RequiredLength = 10;
+            o.User.RequireUniqueEmail = true;
+        })
+           .AddEntityFrameworkStores<ApplicationDbContext>()
+           .AddDefaultTokenProviders();
+
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+        })
+             .AddCookie(options =>
+             {
+                 options.LoginPath = "/Auth/google-login";
+             })
+            .AddGoogle(options =>
+            {
+                options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+                options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+            });
+        builder.Services.AddMvc();
 
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title ="Ecommerce Api", Version ="v1" });
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ecommerce Api", Version = "v1" });
 
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
             {
@@ -50,22 +87,12 @@ public class Program
                 });
         });
 
-        var app = builder.Build();
 
-        IApiVersionDescriptionProvider provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+        builder.Services.AddHttpContextAccessor();
+        var app = builder.Build();     
 
-        // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI(options =>
-            {
-                foreach (var description in provider.ApiVersionDescriptions)
-                {
-                    options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
-                }
-            });
-        }
+        //IApiVersionDescriptionProvider provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
@@ -73,6 +100,8 @@ public class Program
             app.UseSwaggerUI();
         }
 
+        app.UseCors("AllowAll");
+        app.UseRouting();
         app.UseHttpsRedirection();
         app.UseAuthentication();
         app.UseAuthorization();

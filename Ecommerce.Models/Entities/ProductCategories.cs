@@ -1,11 +1,16 @@
-﻿namespace Ecommerce.Models.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Ecommerce.Models.Entities
 {
     public class ProductCategories
     {
-        public string CategoryId { get; set; }
-        public string ProductId { get; set; }
-        public Category Category { get; set; }
-        public Product Product { get; set; }
+        public Guid CategoryId { get; set; }
+        public Guid ProductId { get; set; }
+        [ForeignKey(nameof(CategoryId))]
+        public virtual Category Category { get; set; }
+
+        [ForeignKey(nameof(ProductId))]
+        public  virtual Product Product { get; set; }
 
     }
 }

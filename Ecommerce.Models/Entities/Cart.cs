@@ -1,9 +1,13 @@
-﻿namespace Ecommerce.Models.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Ecommerce.Models.Entities
 {
     public class Cart : BaseEntity
     {
-        public Guid ApplicationUseId { get; set; }
-        public ApplicationUser ApplicationUser { get; set; }
-        public ICollection<CartItem> CartItems { get; set; }
+        public Guid ApplicationUserId { get; set; }
+
+        [ForeignKey(nameof(ApplicationUserId))]
+        public virtual ApplicationUser ApplicationUser { get; set; }
+        public virtual ICollection<CartItem> CartItems { get; set; }
     }
 }

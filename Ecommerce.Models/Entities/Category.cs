@@ -2,7 +2,7 @@
 {
     public class Category : BaseEntity
     {
-        public string Name { get; set; }
-        public ICollection<Product> Products { get; }
+        public string? Name { get; set; }
+        public virtual ICollection<Product> Products { get; }
     }
 }

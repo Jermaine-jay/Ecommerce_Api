@@ -17,19 +17,20 @@ namespace Ecommerce.Data.Context
                 .Property(p => p.Price)
                 .HasPrecision(16, 2);
 
-            modelBuilder.Entity<ApplicationUser>()
-                .HasOne(ci => ci.Cart)
-                .WithOne(p => p.ApplicationUser)
-                .HasForeignKey<ApplicationUser>(ci => ci.CartId)
-                .OnDelete(DeleteBehavior.Cascade);
+        /* modelBuilder.Entity<ApplicationUser>()
+             .HasOne(ci => ci.Cart)
+             .WithOne(p => p.ApplicationUser)
+             .HasForeignKey<ApplicationUser>(ci => ci.CartId)
+             .OnDelete(DeleteBehavior.Cascade);
 
 
-            modelBuilder.Entity<Cart>()
-                .HasOne(ci => ci.ApplicationUser)
-                .WithOne(p => p.Cart)
-                .HasForeignKey<Cart>(ci => ci.ApplicationUseId)
-                .OnDelete(DeleteBehavior.Cascade);
+         modelBuilder.Entity<Cart>()
+             .HasOne(ci => ci.ApplicationUser)
+             .WithOne(p => p.Cart)
+             .HasForeignKey<Cart>(ci => ci.ApplicationUserId)
+             .OnDelete(DeleteBehavior.Cascade);*/
 
+        /*https://localhost:44317/sigin-google*/
 
             modelBuilder.Entity<Cart>()
                 .HasMany(ci => ci.CartItems)
@@ -73,6 +74,7 @@ namespace Ecommerce.Data.Context
 
             base.OnModelCreating(modelBuilder);
         }
+
         public DbSet<Product> Products { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
