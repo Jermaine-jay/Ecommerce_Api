@@ -1,6 +1,6 @@
 ﻿using Ecommerce.Models.Enums;
 using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations.Schema;
+
 
 namespace Ecommerce.Models.Entities
 {
@@ -12,5 +12,9 @@ namespace Ecommerce.Models.Entities
         public UserType UserType { get; set; }
         public bool Active { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public Guid? CartId { get; set; }
+        public virtual Cart Cart { get; set; }
+        public virtual ICollection<Order> Orders { get; set; }
+
     }
 }

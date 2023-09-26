@@ -76,6 +76,9 @@ namespace Ecommerce.Migrations.Migrations
                     b.Property<bool>("Active")
                         .HasColumnType("boolean");
 
+                    b.Property<Guid?>("CartId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text");
@@ -150,18 +153,19 @@ namespace Ecommerce.Migrations.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ApplicationUserId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Carts");
                 });
@@ -231,16 +235,24 @@ namespace Ecommerce.Migrations.Migrations
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("Recieved")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("ShippingAddress")
                         .HasColumnType("text");
 
                     b.Property<decimal>("Total")
                         .HasColumnType("numeric");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("UserName")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
 
                     b.ToTable("Orders");
                 });
@@ -251,7 +263,11 @@ namespace Ecommerce.Migrations.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<Guid?>("OrderId")
+                        .IsRequired()
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("ProductId")
@@ -262,6 +278,9 @@ namespace Ecommerce.Migrations.Migrations
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("numeric");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -305,6 +324,65 @@ namespace Ecommerce.Migrations.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("Ecommerce.Models.Entities.ProductImage", b =>
+                {
+                    b.Property<string>("PublicId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Bytes")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CreatedAt")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Format")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Height")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ResourceType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SecureUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Signature")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Version")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Width")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("PublicId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductImages");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -456,13 +534,12 @@ namespace Ecommerce.Migrations.Migrations
 
             modelBuilder.Entity("Ecommerce.Models.Entities.Cart", b =>
                 {
-                    b.HasOne("Ecommerce.Models.Entities.ApplicationUser", "ApplicationUser")
-                        .WithMany()
-                        .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("Ecommerce.Models.Entities.ApplicationUser", "User")
+                        .WithOne("Cart")
+                        .HasForeignKey("Ecommerce.Models.Entities.Cart", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
-                    b.Navigation("ApplicationUser");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Ecommerce.Models.Entities.CartItem", b =>
@@ -484,17 +561,30 @@ namespace Ecommerce.Migrations.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Ecommerce.Models.Entities.Order", b =>
+                {
+                    b.HasOne("Ecommerce.Models.Entities.ApplicationUser", null)
+                        .WithMany("Orders")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Ecommerce.Models.Entities.OrderItem", b =>
                 {
-                    b.HasOne("Ecommerce.Models.Entities.Order", null)
+                    b.HasOne("Ecommerce.Models.Entities.Order", "Order")
                         .WithMany("OrderItems")
-                        .HasForeignKey("OrderId");
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Ecommerce.Models.Entities.Product", "Product")
                         .WithMany("OrderItems")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Order");
 
                     b.Navigation("Product");
                 });
@@ -508,6 +598,16 @@ namespace Ecommerce.Migrations.Migrations
                         .IsRequired();
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("Ecommerce.Models.Entities.ProductImage", b =>
+                {
+                    b.HasOne("Ecommerce.Models.Entities.Product", "Product")
+                        .WithMany("ProductImages")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -573,6 +673,14 @@ namespace Ecommerce.Migrations.Migrations
                     b.Navigation("RoleClaims");
                 });
 
+            modelBuilder.Entity("Ecommerce.Models.Entities.ApplicationUser", b =>
+                {
+                    b.Navigation("Cart")
+                        .IsRequired();
+
+                    b.Navigation("Orders");
+                });
+
             modelBuilder.Entity("Ecommerce.Models.Entities.Cart", b =>
                 {
                     b.Navigation("CartItems");
@@ -591,6 +699,8 @@ namespace Ecommerce.Migrations.Migrations
             modelBuilder.Entity("Ecommerce.Models.Entities.Product", b =>
                 {
                     b.Navigation("OrderItems");
+
+                    b.Navigation("ProductImages");
                 });
 #pragma warning restore 612, 618
         }

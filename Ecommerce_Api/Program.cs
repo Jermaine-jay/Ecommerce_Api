@@ -1,13 +1,10 @@
-
-using Ecommerce.Data.Context;
-using Ecommerce.Models.Entities;
+using Ecommerce.Services.Infrastructure;
 using Ecommerce_Api.Extensions;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.Authentication.Facebook;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using TaskManager.Services.Configurations.Jwt;
 
 public class Program
 {
@@ -20,39 +17,49 @@ public class Program
         string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
         builder.Services.RegisterDbContext(connectionString);
         builder.Services.RegisterServices();
-        //builder.Services.ConfigureIdentity(builder.Configuration);
+        builder.Services.ConfigureIdentity();
         //builder.Services.ConfigureAuth(builder.Configuration);
+        //builder.Services.ConfigurationBinder(builder.Configuration);
         builder.Services.AddControllers();
-        builder.Services.ConfigureCors();
+        builder.Services.AddHttpClient();
 
-
-        builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(o =>
+        builder.Services.AddCors(opt =>
         {
-            o.SignIn.RequireConfirmedAccount = false;
-            o.Password.RequireDigit = true;
-            o.Password.RequireLowercase = false;
-            o.Password.RequireUppercase = false;
-            o.Password.RequireNonAlphanumeric = false;
-            o.Password.RequiredLength = 10;
-            o.User.RequireUniqueEmail = true;
-        })
-           .AddEntityFrameworkStores<ApplicationDbContext>()
-           .AddDefaultTokenProviders();
-
-        builder.Services.AddAuthentication(options =>
-        {
-            options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
-        })
-             .AddCookie(options =>
-             {
-                 options.LoginPath = "/Auth/google-login";
-             })
-            .AddGoogle(options =>
+            opt.AddPolicy(name: "CorsPolicy", builder =>
             {
-                options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-                options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+                builder.WithOrigins("http://localhost:4200", "https://localhost:4200")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
             });
+        });
+
+
+        Settings setting = builder.Configuration.Get<Settings>()!;
+        builder.Services.AddSingleton(setting);
+
+        Cloudinary cloudinary = setting.Cloudinary;
+        builder.Services.AddSingleton(cloudinary); 
+
+        JwtConfig jwtConfig = setting.JwtConfig;
+        builder.Services.AddSingleton(jwtConfig);
+
+        builder.Services.ConfigureJWT(jwtConfig);
+
+        builder.Services.AddAuthentication()
+
+        .AddGoogle(options =>
+        {
+            options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+            options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+        })
+
+        .AddFacebook(facebookOptions =>
+         {
+             facebookOptions.AppId = builder.Configuration["Authentication:Facebook:AppId"];
+             facebookOptions.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
+         });
+
         builder.Services.AddMvc();
 
 
@@ -60,7 +67,7 @@ public class Program
         builder.Services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ecommerce Api", Version = "v1" });
-
+            c.EnableAnnotations();
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
             {
                 Name = "Authorization",
@@ -89,7 +96,7 @@ public class Program
 
 
         builder.Services.AddHttpContextAccessor();
-        var app = builder.Build();     
+        var app = builder.Build();
 
         //IApiVersionDescriptionProvider provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
 
@@ -100,7 +107,8 @@ public class Program
             app.UseSwaggerUI();
         }
 
-        app.UseCors("AllowAll");
+
+        app.UseCors("CorsPolicy");
         app.UseRouting();
         app.UseHttpsRedirection();
         app.UseAuthentication();

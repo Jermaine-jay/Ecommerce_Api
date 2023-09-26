@@ -1,76 +1,121 @@
-﻿using Ecommerce.Models.Entities;
+﻿using Ecommerce.Models.Dtos.Requests;
+using Ecommerce.Models.Dtos.Responses;
+using Ecommerce.Models.Entities;
+using Ecommerce.Services.Implementations;
 using Ecommerce.Services.Interfaces;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
+using Ecommerce_Api.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 
+
 namespace Ecommerce_Api.Controllers
 {
-    //[Route("api/[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IAuthServices _authServices;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        public AuthController(IAuthServices authServices, SignInManager<ApplicationUser> signInManager)
+        public AuthController(IAuthServices authServices, SignInManager<ApplicationUser> signInManager, IHttpContextAccessor httpContextAccessor)
         {
             _authServices = authServices;
             _signInManager = signInManager;
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+
+
+        [AllowAnonymous]
+        [HttpPost("register", Name = "register")]
+        [SwaggerOperation(Summary = "register user")]
+        [SwaggerResponse(StatusCodes.Status200OK)]
+        [SwaggerResponse(StatusCodes.Status400BadRequest)]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> RegisterUser([FromBody] UserRegistrationRequest request)
+        {
+            var response = await _authServices.RegisterUser(request);
+            return Ok(response);
         }
 
 
         [AllowAnonymous]
-        [HttpPost("signin-google")]
-        [SwaggerOperation(Summary = "Login with Google")]
-        [SwaggerResponse(StatusCodes.Status200OK)]
-        [SwaggerResponse(StatusCodes.Status400BadRequest)]
+        [HttpPost("LoginWithFacebook", Name = "LoginWithFacebook")]
+        [SwaggerOperation(Summary = "Authenticates a user with facebook")]
+        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(AuthenticationResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Type = typeof(AuthenticationResponse))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError)]
-        public IActionResult GoogleLogin()
+        public async Task<IActionResult> FacebookAuth([FromBody] string accessToken)
         {
-            var authenticationProperties = new AuthenticationProperties
-            {
-                RedirectUri = Url.Action("GoogleAuth", "Auth") 
-            };
+            var result = await _authServices.FaceBookAuth(accessToken);
+            if (!result.IsExisting)
+                return RedirectToAction(nameof(ChangePassword));
 
-            return Challenge(authenticationProperties, GoogleDefaults.AuthenticationScheme);
-        }
-
-
-
-        [HttpPost("googleAuth", Name = "googleAuth")]
-        /*[SwaggerOperation(Summary = "Creates user")]
-        [SwaggerResponse(StatusCodes.Status200OK)]
-        [SwaggerResponse(StatusCodes.Status400BadRequest)]
-        [SwaggerResponse(StatusCodes.Status400BadRequest)]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError)]*/
-        public async Task<IActionResult> GoogleAuth()
-        {
-            var authenticateResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
-            if (!authenticateResult.Succeeded)
-            {
-                return RedirectToAction("GoogleLogin");
-            }
-
-            var result = await _authServices.GoogleAuth(authenticateResult);
             return Ok(result);
         }
 
 
-        [Authorize]
-        [HttpGet("LoginUser", Name = "LoginUser")]
-        [SwaggerOperation(Summary = "Login A user")]
+        [AllowAnonymous]
+        [HttpPost("LoginWithGoogle")]
+        [SwaggerOperation(Summary = "Authenticates a user with google")]
         [SwaggerResponse(StatusCodes.Status200OK)]
         [SwaggerResponse(StatusCodes.Status400BadRequest)]
         [SwaggerResponse(StatusCodes.Status400BadRequest)]
         [SwaggerResponse(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> LoginUser()
+        public async Task<IActionResult> GoogleAuth([FromBody] string accessToken)
         {
-            return Ok("WELCOME AMIGO");
+            var response = await _authServices.GoogleAuth(accessToken);
+            if(!response.IsExisting)
+                return RedirectToAction(nameof(ChangePassword));
+            
+            return Ok(response);
+        }
+
+
+
+        [AllowAnonymous]
+        [HttpPost("change-password")]
+        [SwaggerOperation(Summary = "Change user password")]
+        [SwaggerResponse(StatusCodes.Status200OK)]
+        [SwaggerResponse(StatusCodes.Status400BadRequest)]
+        [SwaggerResponse(StatusCodes.Status400BadRequest)]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> ChangePassword([FromBody]ChangePasswordRequest request)
+        {
+            string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
+            var response = await _authServices.ChangePassword(userId, request);
+            return Ok(response);
+        }
+
+
+
+        [AllowAnonymous]
+        [HttpPost("login", Name = "login")]
+        [SwaggerOperation(Summary = "Authenticates user")]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "returns jwt token", Type = typeof(AuthenticationResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Invalid username or password", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
+        public async Task<IActionResult> LoginUser([FromBody] LoginRequest loginRequest)
+        {
+            var response = await _authServices.UserLogin(loginRequest);
+            return Ok(response);
+        }
+
+
+        [Authorize]
+        [HttpPost("test", Name = "test")]
+        [SwaggerOperation(Summary = "register user")]
+        [SwaggerResponse(StatusCodes.Status200OK)]
+        [SwaggerResponse(StatusCodes.Status400BadRequest)]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Test()
+        {
+            var response = await _authServices.ChangeSocialDetails();
+            return Ok(response);
         }
     }
 }

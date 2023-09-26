@@ -13,24 +13,34 @@ namespace Ecommerce.Data.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<ProductImage>()
+                .HasKey(p=>p.PublicId);
+
             modelBuilder.Entity<Product>()
                 .Property(p => p.Price)
                 .HasPrecision(16, 2);
 
-        /* modelBuilder.Entity<ApplicationUser>()
-             .HasOne(ci => ci.Cart)
-             .WithOne(p => p.ApplicationUser)
-             .HasForeignKey<ApplicationUser>(ci => ci.CartId)
-             .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Product>()
+                .HasMany(ci => ci.ProductImages)
+                .WithOne(p => p.Product)
+                .HasForeignKey(ci => ci.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Order>()
+                .HasMany(ci => ci.OrderItems)
+                .WithOne(p => p.Order)
+                .HasForeignKey(ci => ci.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
 
 
-         modelBuilder.Entity<Cart>()
-             .HasOne(ci => ci.ApplicationUser)
-             .WithOne(p => p.Cart)
-             .HasForeignKey<Cart>(ci => ci.ApplicationUserId)
-             .OnDelete(DeleteBehavior.Cascade);*/
+            modelBuilder.Entity<ApplicationUser>()
+                .HasOne(ci => ci.Cart)
+                .WithOne(p => p.User)
+                .HasForeignKey<Cart>(ci => ci.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-        /*https://localhost:44317/sigin-google*/
+            /*https://localhost:44317/sigin-google*/
 
             modelBuilder.Entity<Cart>()
                 .HasMany(ci => ci.CartItems)
@@ -81,5 +91,6 @@ namespace Ecommerce.Data.Context
         public DbSet<Category> Categories { get; set; }
         public DbSet<Cart> Carts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
+        public DbSet<ProductImage> ProductImages { get; set; }
     }
 }
