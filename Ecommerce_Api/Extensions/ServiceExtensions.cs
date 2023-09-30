@@ -1,4 +1,6 @@
 ﻿using Ecommerce.Data.Context;
+using Ecommerce.Data.Implementations;
+using Ecommerce.Data.Interfaces;
 using Ecommerce.Models.Entities;
 using Ecommerce.Services.Implementations;
 using Ecommerce.Services.Interfaces;
@@ -16,8 +18,12 @@ namespace Ecommerce_Api.Extensions
     {
         public static void RegisterServices(this IServiceCollection services)
         {
+            services.AddScoped<IUnitOfWork, UnitOfWork<ApplicationDbContext>>();
             services.AddScoped<IAuthServices, AuthServices>();
             services.AddScoped<IJwtAuthenticator, JwtAuthenticator>();
+            services.AddScoped<IAdminService, AdminService>();
+            services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IUserService, UserService>();
         }
 
 

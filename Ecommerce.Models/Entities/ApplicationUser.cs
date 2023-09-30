@@ -12,6 +12,7 @@ namespace Ecommerce.Models.Entities
         public UserType UserType { get; set; }
         public bool Active { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; }
         public Guid? CartId { get; set; }
         public virtual Cart Cart { get; set; }
         public virtual ICollection<Order> Orders { get; set; }

@@ -13,19 +13,35 @@ namespace Ecommerce.Data.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
             modelBuilder.Entity<ProductImage>()
                 .HasKey(p=>p.PublicId);
 
-            modelBuilder.Entity<Product>()
+            modelBuilder.Entity<ProductVariation>()
                 .Property(p => p.Price)
                 .HasPrecision(16, 2);
 
 
-            modelBuilder.Entity<Product>()
+            modelBuilder.Entity<ProductVariation>()
                 .HasMany(ci => ci.ProductImages)
-                .WithOne(p => p.Product)
-                .HasForeignKey(ci => ci.ProductId)
+                .WithOne(p => p.ProductVariation)
+                .HasForeignKey(ci => ci.ProductVariationId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+
+            modelBuilder.Entity<Order>()
+                .HasOne(ci => ci.ShippingAddress)
+                .WithOne(p => p.Order)
+                .HasForeignKey<Order>(ci => ci.ShippingAddressId)
+                .OnDelete(DeleteBehavior.Cascade); 
+
+
+            modelBuilder.Entity<Product>()
+                .HasOne(ci => ci.ProductVariation)
+                .WithOne(p => p.Product)
+                .HasForeignKey<Product>(ci => ci.ProductVariationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
 
             modelBuilder.Entity<Order>()
                 .HasMany(ci => ci.OrderItems)
@@ -92,5 +108,7 @@ namespace Ecommerce.Data.Context
         public DbSet<Cart> Carts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
+        public DbSet<ProductVariation> ProductVariations { get; set; }
+        public DbSet<ShippingAddress> ShippingAddresses { get; set; }
     }
 }

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Ecommerce.Migrations.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230926093003_AddedProductImage")]
-    partial class AddedProductImage
+    [Migration("20230928155614_initialMigration")]
+    partial class initialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -131,6 +131,9 @@ namespace Ecommerce.Migrations.Migrations
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -181,6 +184,9 @@ namespace Ecommerce.Migrations.Migrations
 
                     b.Property<Guid>("CartId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("Colour")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -238,11 +244,14 @@ namespace Ecommerce.Migrations.Migrations
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("Paid")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("Recieved")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("ShippingAddress")
-                        .HasColumnType("text");
+                    b.Property<Guid?>("ShippingAddressId")
+                        .HasColumnType("uuid");
 
                     b.Property<decimal>("Total")
                         .HasColumnType("numeric");
@@ -256,6 +265,9 @@ namespace Ecommerce.Migrations.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("ShippingAddressId")
+                        .IsUnique();
 
                     b.ToTable("Orders");
                 });
@@ -300,7 +312,7 @@ namespace Ecommerce.Migrations.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CategoryId")
+                    b.Property<Guid?>("CategoryId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
@@ -316,8 +328,8 @@ namespace Ecommerce.Migrations.Migrations
                         .HasPrecision(16, 2)
                         .HasColumnType("numeric(16,2)");
 
-                    b.Property<int>("Stock")
-                        .HasColumnType("integer");
+                    b.Property<Guid?>("ProductVariationId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -325,6 +337,9 @@ namespace Ecommerce.Migrations.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("ProductVariationId")
+                        .IsUnique();
 
                     b.ToTable("Products");
                 });
@@ -334,58 +349,94 @@ namespace Ecommerce.Migrations.Migrations
                     b.Property<string>("PublicId")
                         .HasColumnType("text");
 
-                    b.Property<string>("Bytes")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<long?>("Bytes")
+                        .HasColumnType("bigint");
 
-                    b.Property<string>("CreatedAt")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Format")
-                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Height")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid?>("ProductId")
+                    b.Property<Guid?>("ProductVariationId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("ResourceType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("SecureUrl")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Signature")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Type")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Url")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Version")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Width")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("PublicId");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ProductVariationId");
 
                     b.ToTable("ProductImages");
+                });
+
+            modelBuilder.Entity("Ecommerce.Models.Entities.ProductVariation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Colour")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("StockQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ProductVariations");
+                });
+
+            modelBuilder.Entity("Ecommerce.Models.Entities.ShippingAddress", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("OrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Postcode")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Street")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ShippingAddresses");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -571,6 +622,13 @@ namespace Ecommerce.Migrations.Migrations
                         .HasForeignKey("ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Ecommerce.Models.Entities.ShippingAddress", "ShippingAddress")
+                        .WithOne("Order")
+                        .HasForeignKey("Ecommerce.Models.Entities.Order", "ShippingAddressId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("ShippingAddress");
                 });
 
             modelBuilder.Entity("Ecommerce.Models.Entities.OrderItem", b =>
@@ -597,20 +655,26 @@ namespace Ecommerce.Migrations.Migrations
                     b.HasOne("Ecommerce.Models.Entities.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Ecommerce.Models.Entities.ProductVariation", "ProductVariation")
+                        .WithOne("Product")
+                        .HasForeignKey("Ecommerce.Models.Entities.Product", "ProductVariationId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Category");
+
+                    b.Navigation("ProductVariation");
                 });
 
             modelBuilder.Entity("Ecommerce.Models.Entities.ProductImage", b =>
                 {
-                    b.HasOne("Ecommerce.Models.Entities.Product", "Product")
+                    b.HasOne("Ecommerce.Models.Entities.ProductVariation", "ProductVariation")
                         .WithMany("ProductImages")
-                        .HasForeignKey("ProductId")
+                        .HasForeignKey("ProductVariationId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.Navigation("Product");
+                    b.Navigation("ProductVariation");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -702,8 +766,18 @@ namespace Ecommerce.Migrations.Migrations
             modelBuilder.Entity("Ecommerce.Models.Entities.Product", b =>
                 {
                     b.Navigation("OrderItems");
+                });
+
+            modelBuilder.Entity("Ecommerce.Models.Entities.ProductVariation", b =>
+                {
+                    b.Navigation("Product");
 
                     b.Navigation("ProductImages");
+                });
+
+            modelBuilder.Entity("Ecommerce.Models.Entities.ShippingAddress", b =>
+                {
+                    b.Navigation("Order");
                 });
 #pragma warning restore 612, 618
         }

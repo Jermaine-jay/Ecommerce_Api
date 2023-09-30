@@ -118,6 +118,7 @@ namespace Ecommerce.Services.Implementations
             };
         }
 
+
         public async Task<AuthenticationResponse> FaceBookAuth(string credential)
         {
             var debugTokenResponse = await _httpClient.GetAsync("https://graph.facebook.com/debug_token?input_token=" + credential + $"&access_token={_configuration["Authentication:Facebook:AppId"]}|{_configuration["Authentication:Facebook:AppSecret"]}");
@@ -204,6 +205,7 @@ namespace Ecommerce.Services.Implementations
             };
         }
 
+
         public async Task<ApplicationUser> RegisterUser(UserRegistrationRequest request)
         {
             ApplicationUser? existingUser = await _userManager.FindByEmailAsync(request.Email);
@@ -251,6 +253,7 @@ namespace Ecommerce.Services.Implementations
             return user;
         }
 
+
         public async Task<AuthenticationResponse> UserLogin(LoginRequest request)
         {
             ApplicationUser? user = await _userManager.FindByEmailAsync(request.Email.ToLower().Trim());
@@ -277,6 +280,7 @@ namespace Ecommerce.Services.Implementations
             {
                 DateTimeOffset lockoutEnd = DateTimeOffset.UtcNow.AddSeconds(300);
                 user.LockoutEnd = lockoutEnd;
+                await _userManager.ResetAccessFailedCountAsync(user);
                 throw new InvalidOperationException($"Account locked, Time Left {user.LockoutEnd - DateTimeOffset.UtcNow}");
             }
 
@@ -295,6 +299,7 @@ namespace Ecommerce.Services.Implementations
 
         }
 
+
         public async Task<SuccessResponse> ChangePassword(string userId, ChangePasswordRequest request)
         {
 
@@ -309,8 +314,8 @@ namespace Ecommerce.Services.Implementations
                 Success = true,
             };
         }
-
     }
+
 
     public class SuccessResponse
     {
