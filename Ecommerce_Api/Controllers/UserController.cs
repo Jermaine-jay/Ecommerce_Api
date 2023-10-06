@@ -22,6 +22,7 @@ namespace Ecommerce_Api.Controllers
             _userService = userService;
         }
 
+
         [HttpGet("Profile", Name = "Profile")]
         [SwaggerOperation(Summary = "get loggedin user account ")]
         [SwaggerResponse(StatusCodes.Status200OK, Description = "user", Type = typeof(ProfileResponse))]

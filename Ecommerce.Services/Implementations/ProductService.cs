@@ -61,30 +61,30 @@ namespace Ecommerce.Services.Implementations
             };
         }
 
-        public async Task<SuccessResponse> UpdateProduct(string productId, CreateProductRequest request)
+        public async Task<SuccessResponse> UpdateProduct(UpdateProductRequest request)
         {
-            var product = await _productRepo.GetSingleByAsync(u => u.Id.ToString() == productId);
+            var product = await _productRepo.GetSingleByAsync(u => u.Id.ToString() == request.ProductId);
             if (product == null)
                 throw new InvalidOperationException("Product does not exist");
 
-            var category = await _categoryRepo.GetSingleByAsync(p => p.Name == request.Name.ToLower());
+            var category = await _categoryRepo.GetSingleByAsync(p => p.Name == request.CategoryName.ToLower());
             if (category == null)
                 throw new InvalidOperationException("Category does not exist");
 
-            var updateProduct = new Product
-            {
-                Name = request.Name.ToLower(),
-                Description = request.Description,
-                CategoryId = category.Id,
-            };
 
-            await _productRepo.UpdateAsync(updateProduct);
+            product.Name = request.Name.ToLower() ?? product.Name;
+            product.Description = request.Description ?? product.Description;
+            product.CategoryId = category.Id;
+
+
+            await _productRepo.UpdateAsync(product);
             return new SuccessResponse
             {
                 Success = true,
-                Data = updateProduct
+                Data = product
             };
         }
+
 
         public async Task<SuccessResponse> DeleteProduct(string productId)
         {
@@ -92,20 +92,21 @@ namespace Ecommerce.Services.Implementations
             if (product == null)
                 throw new InvalidOperationException("Product does not exist");
 
+            var productVariation = await _productVariationRepo.GetAllAsync(include: u => u.Include(p => p.ProductImages));
+            var allvar = productVariation.Where(u => u.ProductId.Equals(productId)).ToList();
+
+            if (!allvar.Any())
+                throw new InvalidOperationException("None Found");
+
             var cloudinary = new CloudinaryDotNet.Cloudinary(new Account(_cloudinary.CloudName, _cloudinary.ApiKey, _cloudinary.ApiSecret));
 
-            var images = await _productImagesRepo.GetByAsync(pv => pv.ProductVariationId.Equals(product.ProductVariation.Id));
-            if (images == null)
-                throw new InvalidOperationException("No Image found");
+            var deletionParamsList = allvar.SelectMany(item => item.ProductImages.Select(image => new DeletionParams(image.PublicId))).ToList();
+            await Task.WhenAll(deletionParamsList.Select(param => cloudinary.DestroyAsync(param)));
 
-            foreach (var image in images)
-            {
-                var param = new DeletionParams(image.PublicId) { };
-                await cloudinary.DestroyAsync(param);
-            }
             await _productRepo.DeleteAsync(product);
             return new SuccessResponse { Success = true };
         }
+
 
         public async Task<SuccessResponse> UpdateStock(string productvariationId, int stock)
         {
@@ -164,7 +165,7 @@ namespace Ecommerce.Services.Implementations
         }
 
 
-        public async Task<object> AddVariations(ProductVarionRequest request)
+        public async Task<SuccessResponse> AddVariations(ProductVarionRequest request)
         {
             var product = await _productRepo.GetSingleByAsync(p => p.Id.ToString().Equals(request.ProductId));
             if (product == null)
@@ -240,7 +241,7 @@ namespace Ecommerce.Services.Implementations
                 throw new InvalidOperationException("No Product Found");
 
 
-            return products.OrderByDescending(u=>u.Name).Select(product => new Product
+            return products.OrderByDescending(u => u.Name).Select(product => new Product
             {
                 Name = product.Name,
                 Description = product.Description,
@@ -269,44 +270,16 @@ namespace Ecommerce.Services.Implementations
             var variation = product.ProductVariation.FirstOrDefault();
             return new ProductDto
             {
-               Name = product.Name,
-               Description = product.Description,
-               Price = variation.Price,
-               StockQuantity = variation.StockQuantity,
-               Colour = variation.Colour.GetStringValue(),
-               ImageUrl = variation.ProductImages.First().Url,
-               ImageSecureUrl = variation.ProductImages.First().SecureUrl
+                Name = product.Name,
+                Description = product.Description,
+                Price = variation.Price,
+                StockQuantity = variation.StockQuantity,
+                Colour = variation.Colour.GetStringValue(),
+                ImageUrl = variation.ProductImages.First().Url,
+                ImageSecureUrl = variation.ProductImages.First().SecureUrl
             };
         }
 
-    }
-
-    public class ProductVarionRequest
-    {
-        public string ProductId { get; set; }
-        public int Colour { get; set; }
-        public decimal Price { get; set; }
-        public int StockQuantity { get; set; }
-        public List<IFormFile> files { get; set; }
-
-    }
-
-    public class ProductDto
-    {
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string ProductVariation { get; set; }
-        public string Colour { get; set; }
-        public int StockQuantity { get; set; }
-        public decimal Price { get; set; }
-        public string ImageUrl { get; set; }
-        public string ImageSecureUrl { get; set; }
-    }
-
-    public class ImageDto
-    {
-        public string ImageUrl { get; set; }
-        public string ImageSecureUrl { get; set; }
     }
 }
 

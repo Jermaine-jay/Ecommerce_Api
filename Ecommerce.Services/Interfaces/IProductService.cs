@@ -16,6 +16,7 @@ namespace Ecommerce.Services.Interfaces
         Task<IEnumerable<Product>> GetProductsAsync();
         Task<ProductDto> GetProductAsync(string productId);
         Task<SuccessResponse> AddVariations(ProductVarionRequest request);
+        Task<SuccessResponse> DeleteProduct(string productId);
 
     }
 }

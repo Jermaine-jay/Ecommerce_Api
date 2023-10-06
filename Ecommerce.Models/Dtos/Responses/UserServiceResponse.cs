@@ -22,7 +22,7 @@ namespace Ecommerce.Models.Dtos.Responses
 
     }
 
-    public class CartItemResonse
+    public class CartItemResponse
     {
         public bool? Success { get; set; }
         public HttpStatusCode? StatusCode { get; set; }

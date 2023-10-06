@@ -36,6 +36,7 @@ namespace Ecommerce.Services.Implementations
             return input;
         }
 
+
         public async Task<AuthenticationResponse> GoogleAuth(string credential)
         {
 
@@ -50,8 +51,7 @@ namespace Ecommerce.Services.Implementations
 
             var info = new UserLoginInfo("GOOGLE", payload.Name, "GOOGLE");
             if (info == null)
-                throw new InvalidOperationException($"NO INFO");
-
+                throw new InvalidOperationException($"NO INFO");           
 
             var user = await _userManager.FindByEmailAsync(payload.Email);
             if (user == null)
@@ -139,7 +139,7 @@ namespace Ecommerce.Services.Implementations
             var info = new UserLoginInfo("Facebook", payload.Id, "Facebook");
             if (info == null)
                 throw new InvalidOperationException($"NO INFO");
-
+            
             var user = await _userManager.FindByEmailAsync(payload.Email);
             if (user == null)
             {

@@ -39,10 +39,7 @@ namespace Ecommerce.Data.Seeds
                     Id = Guid.NewGuid(),
                     Name = "Test",
                     Description = "Test",
-                    ProductVariation = new ProductVariation(){
-                        Colour = Colour.Red,
-                         StockQuantity = 10,
-                    Price = 10},
+                    ProductVariation = null
 
                 },
 
@@ -50,21 +47,14 @@ namespace Ecommerce.Data.Seeds
                 {
                     Name = "Test2",
                     Description = "Test2",
-                    ProductVariation = new ProductVariation(){
-                        Colour = Colour.Green,
-                         StockQuantity = 10,
-                        Price = 10,
-                    },
+                    ProductVariation = null
 
         },
                 new Product()
                 {
                     Name = "Test3",
                     Description = "Test3",
-                    ProductVariation = new ProductVariation(){
-                        Colour = Colour.Blue,
-                    Price = 10,
-                         StockQuantity = 10 },
+                    ProductVariation = null
         },
 
             };

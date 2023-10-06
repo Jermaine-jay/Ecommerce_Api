@@ -24,6 +24,9 @@ namespace Ecommerce_Api.Extensions
             services.AddScoped<IAdminService, AdminService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<IPaystackPaymentService, PaystackPaymentService>();
+            services.AddScoped<IFlutterwavePaymentService, FlutterwavePaymentService>();
         }
 
 

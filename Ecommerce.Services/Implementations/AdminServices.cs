@@ -1,14 +1,9 @@
-﻿using CloudinaryDotNet;
-using CloudinaryDotNet.Actions;
-using Ecommerce.Data.Interfaces;
+﻿using Ecommerce.Data.Interfaces;
 using Ecommerce.Models.Dtos.Requests;
 using Ecommerce.Models.Dtos.Responses;
 using Ecommerce.Models.Entities;
-using Ecommerce.Models.Enums;
 using Ecommerce.Services.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using System.Net;
 
 
@@ -25,7 +20,7 @@ namespace Ecommerce.Services.Implementations
         private readonly Ecommerce.Services.Infrastructure.Cloudinary _cloudinary;
 
 
-        public AdminService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager , Ecommerce.Services.Infrastructure.Cloudinary cloudinary)
+        public AdminService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, Ecommerce.Services.Infrastructure.Cloudinary cloudinary)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
@@ -60,7 +55,7 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<SuccessResponse> UpdateCategory(string CategoryId, string name)
         {
-            var category = await _categoryRepo.GetSingleByAsync(u => u.Id.ToString() == CategoryId)??
+            var category = await _categoryRepo.GetSingleByAsync(u => u.Id.ToString() == CategoryId) ??
                 throw new InvalidOperationException("Category does not exist");
 
             category.Name = name;
@@ -85,7 +80,7 @@ namespace Ecommerce.Services.Implementations
                 Data = categories
             };
         }
-    
+
         public async Task<SuccessResponse> GetUsers()
         {
             var users = await _userRepo.GetAllAsync();
@@ -160,19 +155,5 @@ namespace Ecommerce.Services.Implementations
                 Success = true
             };
         }
-    }
-
-    public class ApplicationUserDto
-    {
-        public string? FirstName { get; set; }
-        public string? LastName { get; set; }
-        public string? Email { get; set; }
-        public string? PhoneNumber { get; set; }
-        public UserType UserType { get; set; }
-        public string Active { get; set; }
-        public string CreatedAt { get; set; }
-        public string? UpdatedAt { get; set; }
-        public string EmailConfirmed { get; set; }
-        public string LockedOut { get; set; }
     }
 }

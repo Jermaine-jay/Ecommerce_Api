@@ -37,9 +37,9 @@ namespace Ecommerce.Data.Context
 
 
             modelBuilder.Entity<Product>()
-                .HasOne(ci => ci.ProductVariation)
+                .HasMany(ci => ci.ProductVariation)
                 .WithOne(p => p.Product)
-                .HasForeignKey<Product>(ci => ci.ProductVariationId)
+                .HasForeignKey(ci => ci.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
 
 
@@ -55,6 +55,13 @@ namespace Ecommerce.Data.Context
                 .WithOne(p => p.User)
                 .HasForeignKey<Cart>(ci => ci.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+
+            modelBuilder.Entity<ApplicationUser>()
+                .HasMany(ci => ci.Orders)
+                .WithOne(p => p.ApplicationUser)
+                .HasForeignKey(ci => ci.ApplicationUserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             /*https://localhost:44317/sigin-google*/
 

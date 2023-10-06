@@ -1,4 +1,5 @@
-﻿using Ecommerce.Data.Interfaces;
+﻿using CloudinaryDotNet.Actions;
+using Ecommerce.Data.Interfaces;
 using Ecommerce.Models.Dtos.Requests;
 using Ecommerce.Models.Dtos.Responses;
 using Ecommerce.Models.Entities;
@@ -51,6 +52,7 @@ namespace Ecommerce.Services.Implementations
             };
         }
 
+
         public async Task<SuccessResponse> DeleteAccount(string userId)
         {
             var user = await _userRepo.GetSingleByAsync(user => user.Id.ToString() == userId);
@@ -63,6 +65,7 @@ namespace Ecommerce.Services.Implementations
                 Success = true
             };
         }
+
 
         public async Task<ProfileResponse> Profile(string userId)
         {
@@ -78,6 +81,7 @@ namespace Ecommerce.Services.Implementations
                 PhoneNumber = user.PhoneNumber,
             };
         }
+
 
         public async Task<SuccessResponse> UpdateAccount(string userId, UpdateUserRequest request)
         {
@@ -96,6 +100,7 @@ namespace Ecommerce.Services.Implementations
                 Success = true,
             };
         }
+
 
         public async Task<CartResponse> GetCart(string userId)
         {
@@ -121,7 +126,8 @@ namespace Ecommerce.Services.Implementations
             return result;
         }
 
-        public async Task<CartItemResonse> AddToCart(string userId, AddToCartRequest request)
+
+        public async Task<CartItemResponse> AddToCart(string userId, AddToCartRequest request)
         {
             var cart = await _cartRepo.GetSingleByAsync(u => u.UserId.ToString().Equals(userId))
                 ?? throw new InvalidOperationException("User cart Not Found");
@@ -172,7 +178,7 @@ namespace Ecommerce.Services.Implementations
             await _cartItemRepo.AddAsync(cartitem);
             await _cartRepo.UpdateAsync(cart);
 
-            return new CartItemResonse
+            return new CartItemResponse
             {
                 Success = true,
                 StatusCode = HttpStatusCode.OK,
@@ -181,12 +187,13 @@ namespace Ecommerce.Services.Implementations
 
         }
 
+
         public async Task<SuccessResponse> DeleteFromCart(string userId, string cartitemId)
         {
             var cart = await _cartRepo.GetSingleByAsync(u => u.UserId.ToString().Equals(userId))
                 ?? throw new InvalidOperationException("User cart Not Found");
 
-            var cartitem = await _cartItemRepo.GetSingleByAsync(u => u.Id.Equals(cartitemId))
+            var cartitem = cart.CartItems.Where(item => item.Id.Equals(cartitemId)).FirstOrDefault()
                 ?? throw new InvalidOperationException("Item Not Found");
 
             await _cartItemRepo.DeleteAsync(cartitem);
@@ -194,6 +201,24 @@ namespace Ecommerce.Services.Implementations
             {
                 Success = true,
             };
+        }
+
+
+        public async Task<SuccessResponse> DeleteCartItems(string userId)
+        {
+            var cart = await _cartRepo.GetSingleByAsync(u => u.UserId.ToString().Equals(userId), include: p=> p.Include(p=>p.CartItems))
+                ?? throw new InvalidOperationException("User cart Not Found");
+
+            var itemList = cart.CartItems.ToList()
+             ?? throw new InvalidOperationException("Items Not Found");
+
+            await Task.WhenAll(itemList.Select(item => _cartItemRepo.DeleteAsync(item)));
+
+            return new SuccessResponse
+            { 
+                Success = true,
+            };
+            
         }
     }
 }
