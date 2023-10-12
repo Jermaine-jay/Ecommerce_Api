@@ -5,10 +5,12 @@ using Ecommerce.Models.Dtos.Requests;
 using Ecommerce.Models.Dtos.Responses;
 using Ecommerce.Models.Entities;
 using Ecommerce.Models.Enums;
+using Ecommerce.Services.Infrastructure;
 using Ecommerce.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.Net;
 
 namespace Ecommerce.Services.Implementations
@@ -20,10 +22,10 @@ namespace Ecommerce.Services.Implementations
         private readonly IRepository<ProductImage> _productImagesRepo;
         private readonly IRepository<ProductVariation> _productVariationRepo;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly Infrastructure.Cloudinary _cloudinary;
+        private readonly CloudinarySettings _cloudinary;
 
 
-        public ProductService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, Infrastructure.Cloudinary cloudinary)
+        public ProductService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, CloudinarySettings cloudinary)
         {
             _unitOfWork = unitOfWork;
             _categoryRepo = _unitOfWork.GetRepository<Category>();
@@ -61,27 +63,33 @@ namespace Ecommerce.Services.Implementations
             };
         }
 
-        public async Task<SuccessResponse> UpdateProduct(UpdateProductRequest request)
+        public async Task<ProductUpdateResponse> UpdateProduct(UpdateProductRequest request)
         {
             var product = await _productRepo.GetSingleByAsync(u => u.Id.ToString() == request.ProductId);
             if (product == null)
                 throw new InvalidOperationException("Product does not exist");
 
-            var category = await _categoryRepo.GetSingleByAsync(p => p.Name == request.CategoryName.ToLower());
-            if (category == null)
-                throw new InvalidOperationException("Category does not exist");
+            if(!request.CategoryName.IsNullOrEmpty() && request.CategoryName != "string")
+            {
+                var category = await _categoryRepo.GetSingleByAsync(p => p.Name == request.CategoryName.ToLower());
+                if (category == null)
+                    throw new InvalidOperationException("Category does not exist");
+
+                product.CategoryId = category.Id;
+            }
 
 
             product.Name = request.Name.ToLower() ?? product.Name;
             product.Description = request.Description ?? product.Description;
-            product.CategoryId = category.Id;
-
+            product.UpdatedAt = DateTime.UtcNow;
 
             await _productRepo.UpdateAsync(product);
-            return new SuccessResponse
+            return new ProductUpdateResponse
             {
-                Success = true,
-                Data = product
+                Name = product.Name, 
+                Description = product.Description,
+                CategoryId = product.CategoryId.ToString(),
+                CategoryName = product.Category.Name
             };
         }
 
@@ -129,7 +137,7 @@ namespace Ecommerce.Services.Implementations
             if (files == null || !files.Any())
                 throw new InvalidOperationException("File cannot be empty");
 
-            var cloudinary = new CloudinaryDotNet.Cloudinary(new Account(_cloudinary.CloudName, _cloudinary.ApiKey, _cloudinary.ApiSecret));
+            var cloudinary = new Cloudinary(new Account(_cloudinary.CloudName, _cloudinary.ApiKey, _cloudinary.ApiSecret));
             if (cloudinary == null)
                 throw new InvalidOperationException("Invalid Cloud parameters");
 
@@ -167,9 +175,8 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<SuccessResponse> AddVariations(ProductVarionRequest request)
         {
-            var product = await _productRepo.GetSingleByAsync(p => p.Id.ToString().Equals(request.ProductId));
-            if (product == null)
-                throw new InvalidOperationException("Product does not exist");
+            var product = await _productRepo.GetSingleByAsync(p => p.Id.ToString() == request.ProductId, include: u=> u.Include(u=>u.ProductVariation))
+                ??throw new InvalidOperationException("Product does not exist");
 
             var colour = Colour.AsDisplayed;
             switch (request.Colour)
@@ -209,7 +216,10 @@ namespace Ecommerce.Services.Implementations
             };
 
             await _productVariationRepo.AddAsync(newVar);
-            var images = await AddImages(newVar.Id, request.files);
+            if(request.files != null)
+            {
+                var images = await AddImages(newVar.Id, request.files);
+            }
             return new SuccessResponse
             {
                 Success = true,
@@ -243,6 +253,7 @@ namespace Ecommerce.Services.Implementations
 
             return products.OrderByDescending(u => u.Name).Select(product => new Product
             {
+                Id = product.Id,
                 Name = product.Name,
                 Description = product.Description,
                 ProductVariation = product.ProductVariation.Select(pv => new ProductVariation
@@ -263,11 +274,12 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<ProductDto> GetProductAsync(string productId)
         {
-            var product = await _productRepo.GetSingleByAsync(pro => pro.Id.Equals(productId), include: u => u.Include(p => p.ProductVariation));
-            if (product == null)
-                throw new InvalidOperationException("No Product Found");
+            var product = await _productRepo.GetSingleByAsync(pro => pro.Id.ToString() == productId, include: u => u.Include(p => p.ProductVariation))
+                ??throw new InvalidOperationException("No Product Found");
 
-            var variation = product.ProductVariation.FirstOrDefault();
+            var variation = product.ProductVariation.FirstOrDefault()
+                ??throw new InvalidOperationException("No Product variation Found");
+
             return new ProductDto
             {
                 Name = product.Name,

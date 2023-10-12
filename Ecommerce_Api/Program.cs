@@ -1,46 +1,49 @@
-using Ecommerce.Data.Seeds;
+using Ecommerce.Services.Configurations.Cache.CacheServices;
+using Ecommerce.Services.Configurations.Jwt;
 using Ecommerce.Services.Infrastructure;
 using Ecommerce_Api.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using TaskManager.Services.Configurations.Jwt;
 
 
-    var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
-    // Add services to the container.
+// Add services to the container.
 
-    string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    builder.Services.RegisterDbContext(connectionString);
-        builder.Services.RegisterServices();
-        builder.Services.ConfigureIdentity();
-        //builder.Services.ConfigureAuth(builder.Configuration);
-        //builder.Services.ConfigurationBinder(builder.Configuration);
-        builder.Services.AddControllers();
-        builder.Services.AddHttpClient();
+string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.RegisterDbContext(connectionString);
+builder.Services.RegisterServices();
+builder.Services.ConfigureIdentity();
+//builder.Services.ConfigureAuth(builder.Configuration);
+builder.Services.AddControllers();
+builder.Services.AddHttpClient();
 
-        builder.Services.AddCors(opt =>
-        {
-            opt.AddPolicy(name: "CorsPolicy", builder =>
-            {
-                builder.WithOrigins("http://localhost:4200", "https://localhost:4200")
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials();
+builder.Services.AddCors(opt =>
+{
+    opt.AddPolicy(name: "CorsPolicy", builder =>
+    {
+        builder.WithOrigins("http://localhost:4200", "https://localhost:4200")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
 });
-        });
 
 
 Settings setting = builder.Configuration.Get<Settings>()!;
 builder.Services.AddSingleton(setting);
 
-Cloudinary cloudinary = setting.Cloudinary;
+CloudinarySettings cloudinary = setting.CloudinarySettings;
 builder.Services.AddSingleton(cloudinary);
 
 JwtConfig jwtConfig = setting.JwtConfig;
 builder.Services.AddSingleton(jwtConfig);
 
+RedisConfig redisConfig = setting.redisConfig;
+builder.Services.AddSingleton(redisConfig);
+
 builder.Services.ConfigureJWT(jwtConfig);
+builder.Services.AddRedisCache(redisConfig);
 
 builder.Services.AddAuthentication()
 
@@ -76,17 +79,17 @@ builder.Services.AddSwaggerGen(c =>
     });
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
         {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
                     {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                            Array.Empty<string>()
-                    },
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                },
+                    Array.Empty<string>()
+            },
         });
 });
 
@@ -94,15 +97,11 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 
-//IApiVersionDescriptionProvider provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
-
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
 
 app.UseCors("CorsPolicy");
 app.UseRouting();
@@ -111,8 +110,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.ConfigureException(builder.Environment);
 //await app.ProductSeeder();
-
 
 app.Run();

@@ -1,17 +1,12 @@
-﻿using Ecommerce.Services.Implementations;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Ecommerce.Models.Dtos.Requests;
+using Ecommerce.Models.Dtos.Responses;
 
 namespace Ecommerce.Services.Interfaces
 {
     public interface IFlutterwavePaymentService
     {
-        Task<object> FlutterPayment(FlutterPaymentRequest request);
-        Task<object> VerifyFlutterPayment([FromQuery] string transaction_id);
+        Task<FlutterTransactionResponse> FlutterPayment(string userId, FlutterPaymentRequest request);
+        Task<FlutterTransactionResponse> VerifyFlutterPayment(string transaction_id);
         Task<bool> IsServiceUpAsync();
     }
 }

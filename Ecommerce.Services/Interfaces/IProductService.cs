@@ -9,9 +9,9 @@ namespace Ecommerce.Services.Interfaces
     public interface IProductService
     {
         Task<SuccessResponse> UpdateStock(string productId, int stock);
-        Task<SuccessResponse> UpdateProduct(UpdateProductRequest request);
+        Task<ProductUpdateResponse> UpdateProduct(UpdateProductRequest request);
         Task<CreateProductResponse> CreateProduct(CreateProductRequest request);
-        Task<object> AddImages(Guid productId, List<IFormFile> files);
+        //Task<object> AddImages(Guid productId, List<IFormFile> files);
         Task<SuccessResponse> DeleteImage(string publicId);
         Task<IEnumerable<Product>> GetProductsAsync();
         Task<ProductDto> GetProductAsync(string productId);

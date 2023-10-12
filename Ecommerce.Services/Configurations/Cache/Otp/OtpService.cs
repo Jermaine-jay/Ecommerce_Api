@@ -1,7 +1,7 @@
-﻿using TaskManager.Services.Configurations.Cache.CacheServices;
-using TaskManager.Services.Configurations.Cache.Security;
+﻿using Ecommerce.Services.Configurations.Cache.CacheServices;
+using Ecommerce.Services.Configurations.Cache.Security;
 
-namespace TaskManager.Services.Configurations.Cache.Otp
+namespace Ecommerce.Services.Configurations.Cache.Otp
 {
     public class OtpService : IOtpService
     {

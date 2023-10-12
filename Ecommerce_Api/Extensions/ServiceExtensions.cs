@@ -2,14 +2,17 @@
 using Ecommerce.Data.Implementations;
 using Ecommerce.Data.Interfaces;
 using Ecommerce.Models.Entities;
+using Ecommerce.Services.Configurations.Cache.CacheServices;
+using Ecommerce.Services.Configurations.Jwt;
 using Ecommerce.Services.Implementations;
 using Ecommerce.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
+using System.Security.Authentication;
 using System.Text;
-using TaskManager.Services.Configurations.Jwt;
 
 
 namespace Ecommerce_Api.Extensions
@@ -25,6 +28,7 @@ namespace Ecommerce_Api.Extensions
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IPaystackPaymentService, PaystackPaymentService>();
             services.AddScoped<IFlutterwavePaymentService, FlutterwavePaymentService>();
         }
@@ -115,6 +119,38 @@ namespace Ecommerce_Api.Extensions
                      policy.Build();
                  });
              });*/
+        }
+
+        public static void AddRedisCache(this IServiceCollection services, RedisConfig redisConfig)
+        {
+
+            ConfigurationOptions configurationOptions = new ConfigurationOptions();
+            configurationOptions.SslProtocols = SslProtocols.Tls12;
+            configurationOptions.SyncTimeout = 30000;
+            configurationOptions.Ssl = true;
+            configurationOptions.Password = redisConfig.Password;
+            configurationOptions.AbortOnConnectFail = false;
+            configurationOptions.EndPoints.Add(redisConfig.Host, redisConfig.Port);
+
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = configurationOptions.ToString();
+                options.InstanceName = redisConfig.InstanceId;
+            });
+
+            services.AddSingleton<IConnectionMultiplexer>((x) =>
+            {
+                var connectionMultiplexer = ConnectionMultiplexer.Connect(new ConfigurationOptions
+                {
+                    Password = configurationOptions.Password,
+                    EndPoints = { configurationOptions.EndPoints[0] },
+                    AbortOnConnectFail = false,
+                    AllowAdmin = false,
+                    ClientName = redisConfig.InstanceId
+                });
+                return connectionMultiplexer;
+            });
+            services.AddTransient<ICacheService, CacheService>();
         }
     }
 }

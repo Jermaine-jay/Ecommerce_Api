@@ -9,7 +9,7 @@ using System.Security.Claims;
 using System.Text;
 
 
-namespace TaskManager.Services.Configurations.Jwt
+namespace Ecommerce.Services.Configurations.Jwt
 {
     public class JwtAuthenticator : IJwtAuthenticator
     {

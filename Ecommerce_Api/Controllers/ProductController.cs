@@ -3,6 +3,7 @@ using Ecommerce.Models.Dtos.Responses;
 using Ecommerce.Models.Entities;
 using Ecommerce.Services.Implementations;
 using Ecommerce.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -49,7 +50,7 @@ namespace Ecommerce_Api.Controllers
 
         [HttpDelete("delete-product", Name = "delete-product")]
         [SwaggerOperation(Summary = "delete existing product ")]
-        [SwaggerResponse(StatusCodes.Status201Created, Description = "true", Type = typeof(CreateProductResponse))]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "true", Type = typeof(ProductUpdateResponse))]
         [SwaggerResponse(StatusCodes.Status404NotFound, Description = "product doesn't exist", Type = typeof(ErrorResponse))]
         [SwaggerResponse(StatusCodes.Status404NotFound, Description = "No image found", Type = typeof(ErrorResponse))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
@@ -61,15 +62,15 @@ namespace Ecommerce_Api.Controllers
         }
 
 
-        [HttpPost("add-variation", Name = "add-variation")]
+        [AllowAnonymous]
+        [HttpPost("addvariation", Name = "addvariation")]
         [SwaggerOperation(Summary = "add product varieties")]
         [SwaggerResponse(StatusCodes.Status201Created, Description = "true", Type = typeof(SuccessResponse))]
         [SwaggerResponse(StatusCodes.Status404NotFound, Description = "product doesn't exist", Type = typeof(ErrorResponse))]
         [SwaggerResponse(StatusCodes.Status404NotFound, Description = "File cannot be empty", Type = typeof(ErrorResponse))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
-        public async Task<IActionResult> AddVariations([FromBody] ProductVarionRequest request)
+        public async Task<IActionResult> AddVariations([FromForm] ProductVarionRequest request)
         {
-
             var response = await _productService.AddVariations(request);
             return Ok(response);
         }
@@ -77,9 +78,9 @@ namespace Ecommerce_Api.Controllers
 
         [HttpDelete("delete-image", Name = "delete-image")]
         [SwaggerOperation(Summary = "delete product image")]
-        [SwaggerResponse(StatusCodes.Status201Created, Description = "true", Type = typeof(SuccessResponse))]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "true", Type = typeof(SuccessResponse))]
         [SwaggerResponse(StatusCodes.Status404NotFound, Description = "product doesn't exist", Type = typeof(ErrorResponse))]
-        [SwaggerResponse(StatusCodes.Status404NotFound, Description = "File cannot be empty", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "File cannot be empty", Type = typeof(ErrorResponse))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
         public async Task<IActionResult> DeleteImage(string publicId)
         {
@@ -91,12 +92,11 @@ namespace Ecommerce_Api.Controllers
 
         [HttpGet("all-products", Name = "all-products")]
         [SwaggerOperation(Summary = "get all product")]
-        [SwaggerResponse(StatusCodes.Status201Created, Description = "products", Type = typeof(Product))]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "products", Type = typeof(Product))]
         [SwaggerResponse(StatusCodes.Status404NotFound, Description = "No product found", Type = typeof(ErrorResponse))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
         public async Task<IActionResult> GetProducts()
         {
-
             var response = await _productService.GetProductsAsync();
             return Ok(response);
         }
@@ -104,7 +104,7 @@ namespace Ecommerce_Api.Controllers
 
         [HttpGet("product", Name = "product")]
         [SwaggerOperation(Summary = "get product")]
-        [SwaggerResponse(StatusCodes.Status201Created, Description = "product", Type = typeof(ProductDto))]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "product", Type = typeof(ProductDto))]
         [SwaggerResponse(StatusCodes.Status404NotFound, Description = "No product found", Type = typeof(ErrorResponse))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
         public async Task<IActionResult> GetProduct(string productId)

@@ -1,8 +1,7 @@
-﻿namespace TaskManager.Services.Configurations.Email
+﻿namespace Ecommerce.Services.Configurations.Email
 {
     public class EmailSenderOptions
     {
-
         public string SmtpServer { get; set; }
         public int Port { get; set; }
         public bool UseSsl { get; set; }

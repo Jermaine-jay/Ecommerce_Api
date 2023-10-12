@@ -49,13 +49,13 @@ namespace Ecommerce.Data.Seeds
                     Description = "Test2",
                     ProductVariation = null
 
-        },
+                },
                 new Product()
                 {
                     Name = "Test3",
                     Description = "Test3",
                     ProductVariation = null
-        },
+                },
 
             };
         }

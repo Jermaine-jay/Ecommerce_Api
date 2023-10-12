@@ -1,5 +1,6 @@
 ﻿using Ecommerce.Models.Dtos.Requests;
 using Ecommerce.Models.Dtos.Responses;
+using Ecommerce.Models.Entities;
 using Ecommerce.Services.Implementations;
 using Ecommerce.Services.Interfaces;
 using Ecommerce_Api.Extensions;
@@ -81,13 +82,13 @@ namespace Ecommerce_Api.Controllers
 
         [HttpGet("get-cart", Name = "get-cart")]
         [SwaggerOperation(Summary = "get user cart")]
-        [SwaggerResponse(StatusCodes.Status201Created, Description = "cartitem", Type = typeof(CartItemResponse))]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "cartitem", Type = typeof(Cart))]
         [SwaggerResponse(StatusCodes.Status404NotFound, Description = "User Not Found", Type = typeof(ErrorResponse))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
         public async Task<IActionResult> GetCart()
         {
             string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
-            var response = await _userService.GetCart(userId);
+            var response = await _userService.GetCart("994f5f3d-f22b-407e-8016-ee7ed508da4e");
             return Ok(response);
         }
 
@@ -101,21 +102,35 @@ namespace Ecommerce_Api.Controllers
         public async Task<IActionResult> AddToCart([FromBody] AddToCartRequest request)
         {
             string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
-            var response = await _userService.AddToCart(userId, request);
+            var response = await _userService.AddToCart("994f5f3d-f22b-407e-8016-ee7ed508da4e", request);
             return Ok(response);
         }
 
 
 
         [HttpDelete("delete-from-cart", Name = "delete-from-cart")]
-        [SwaggerOperation(Summary = "add item to user cart")]
-        [SwaggerResponse(StatusCodes.Status201Created, Description = "user", Type = typeof(CartItemResponse))]
+        [SwaggerOperation(Summary = "delete an item from user cart")]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "cartitem", Type = typeof(CartItemResponse))]
         [SwaggerResponse(StatusCodes.Status404NotFound, Description = "User Not Found", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, Description = "User cart Not Found", Type = typeof(ErrorResponse))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
-        public async Task<IActionResult> DeleteFromCart([FromBody] string cartitemId)
+        public async Task<IActionResult> DeleteFromCart(string cartitemId)
         {
             string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
-            var response = await _userService.DeleteFromCart(userId, cartitemId);
+            var response = await _userService.DeleteFromCart("994f5f3d-f22b-407e-8016-ee7ed508da4e", cartitemId);
+            return Ok(response);
+        }
+
+
+        [HttpDelete("delete-cartitems", Name = "delete-cartitems")]
+        [SwaggerOperation(Summary = "delete all user cart items")]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "user", Type = typeof(CartItemResponse))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, Description = "User Not Found", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
+        public async Task<IActionResult> DeleteCartItems()
+        {
+            string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
+            var response = await _userService.DeleteCartItems("994f5f3d-f22b-407e-8016-ee7ed508da4e");
             return Ok(response);
         }
     }

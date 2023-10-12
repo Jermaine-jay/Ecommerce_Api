@@ -1,4 +1,4 @@
-﻿namespace TaskManager.Services.Configurations.Cache.CacheServices
+﻿namespace Ecommerce.Services.Configurations.Cache.CacheServices
 {
     public class RedisConfig
     {

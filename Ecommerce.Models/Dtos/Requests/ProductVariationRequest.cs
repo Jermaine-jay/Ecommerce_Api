@@ -4,11 +4,11 @@ namespace Ecommerce.Models.Dtos.Requests
 {
     public class ProductVarionRequest
     {
-        public string ProductId { get; set; }
+        public string? ProductId { get; set; }
         public int Colour { get; set; }
         public decimal Price { get; set; }
         public int StockQuantity { get; set; }
-        public List<IFormFile> files { get; set; }
+        public List<IFormFile>? files { get; set; }
 
     }
 

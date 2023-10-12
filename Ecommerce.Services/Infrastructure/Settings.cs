@@ -1,4 +1,8 @@
-﻿using TaskManager.Services.Configurations.Jwt;
+﻿
+
+using Ecommerce.Services.Configurations.Cache.CacheServices;
+using Ecommerce.Services.Configurations.Jwt;
+using Ecommerce.Services.Configurations.Email;
 
 namespace Ecommerce.Services.Infrastructure
 {
@@ -9,34 +13,9 @@ namespace Ecommerce.Services.Infrastructure
         public RedisConfig? redisConfig { get; set; }
         public ZeroBounceConfig? ZeroBounceConfig { get; set; }
         public EmailSenderOptions? EmailSenderOptions { get; set; }
-        public Cloudinary? Cloudinary { get; set; }
+        public CloudinarySettings? CloudinarySettings { get; set; }
     }
 
-    public class EmailSenderOptions
-    {
-        public string SmtpServer { get; set; }
-        public int Port { get; set; }
-        public bool UseSsl { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; }
-        public string Email { get; set; }
-        public string DisplayName { get; set; }
-    }
-
-    public class ZeroBounceConfig
-    {
-        public string Url { get; set; }
-        public string ApiKey { get; set; }
-    }
-
-    public class RedisConfig
-    {
-        public string InstanceId { get; set; } = null!;
-        public string Host { get; set; } = null!;
-        public string IP { get; set; } = null!;
-        public string Password { get; set; } = null!;
-        public int Port { get; set; }
-    }
 
     public class Authentication
     {
@@ -57,7 +36,7 @@ namespace Ecommerce.Services.Infrastructure
     }
 
 
-    public class Cloudinary
+    public class CloudinarySettings
     {
         public string CloudName { get; set; }
         public string ApiKey { get; set; }

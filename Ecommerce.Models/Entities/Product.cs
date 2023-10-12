@@ -10,7 +10,6 @@ namespace Ecommerce.Models.Entities
         public Guid? CategoryId { get; set; }
         public virtual Category? Category { get; set; }
         public virtual ICollection< ProductVariation>? ProductVariation { get; set; }
-        public virtual ICollection<OrderItem>? OrderItems { get; set; }
         
     }
 }

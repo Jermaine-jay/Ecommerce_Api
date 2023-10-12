@@ -1,4 +1,4 @@
-﻿namespace TaskManager.Services.Configurations.Email
+﻿namespace Ecommerce.Services.Configurations.Email
 {
     public class ZeroBounceConfig
     {

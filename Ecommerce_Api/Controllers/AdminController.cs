@@ -1,6 +1,5 @@
 ﻿using Ecommerce.Models.Dtos.Requests;
 using Ecommerce.Models.Dtos.Responses;
-using Ecommerce.Services.Implementations;
 using Ecommerce.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -71,12 +70,24 @@ namespace Ecommerce_Api.Controllers
         }
 
 
+        [HttpPost("create-category", Name = "create-category")]
+        [SwaggerOperation(Summary = "create categories")]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "category", Type = typeof(CreateCategoryResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "No category found", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
+        public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryRequest request)
+        {
+            var response = await _adminService.CreateCategory(request);
+            return Ok(response);
+        }
+
+
         [HttpGet("all-categories", Name = "all-categories")]
         [SwaggerOperation(Summary = "all categories")]
         [SwaggerResponse(StatusCodes.Status200OK, Description = "users pro", Type = typeof(SuccessResponse))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "No category found", Type = typeof(ErrorResponse))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
-        public async Task<IActionResult> UsersProjectsWithTasks()
+        public async Task<IActionResult> GetAllCategories()
         {
             var response = await _adminService.GetAllCategories();
             return Ok(response);

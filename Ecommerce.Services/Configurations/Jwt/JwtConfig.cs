@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TaskManager.Services.Configurations.Jwt
+namespace Ecommerce.Services.Configurations.Jwt
 {
     public class JwtConfig
     {

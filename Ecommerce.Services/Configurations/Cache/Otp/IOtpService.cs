@@ -1,4 +1,4 @@
-﻿namespace TaskManager.Services.Configurations.Cache.Otp
+﻿namespace Ecommerce.Services.Configurations.Cache.Otp
 {
     public interface IOtpService
     {

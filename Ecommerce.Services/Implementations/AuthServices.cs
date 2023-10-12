@@ -3,12 +3,12 @@ using Ecommerce.Models.Dtos.Requests;
 using Ecommerce.Models.Dtos.Responses;
 using Ecommerce.Models.Entities;
 using Ecommerce.Models.Enums;
+using Ecommerce.Services.Configurations.Cache.CacheServices;
 using Ecommerce.Services.Interfaces;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
 
 namespace Ecommerce.Services.Implementations
 {
@@ -19,15 +19,19 @@ namespace Ecommerce.Services.Implementations
         private readonly IJwtAuthenticator _jwtAuthenticator;
         private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
+        private readonly ICacheService _cacheService;
 
 
-        public AuthServices(UserManager<ApplicationUser> userManager, IConfiguration configuration, RoleManager<ApplicationRole> roleManager, IJwtAuthenticator jwtAuthenticator, HttpClient httpClient)
+
+        public AuthServices(UserManager<ApplicationUser> userManager, IConfiguration configuration, RoleManager<ApplicationRole> roleManager,
+            IJwtAuthenticator jwtAuthenticator, HttpClient httpClient, ICacheService cacheService)
         {
             _userManager = userManager;
             _configuration = configuration;
             _roleManager = roleManager;
             _jwtAuthenticator = jwtAuthenticator;
             _httpClient = httpClient;
+            _cacheService = cacheService;
         }
 
         public async Task<object> ChangeSocialDetails()
@@ -51,7 +55,7 @@ namespace Ecommerce.Services.Implementations
 
             var info = new UserLoginInfo("GOOGLE", payload.Name, "GOOGLE");
             if (info == null)
-                throw new InvalidOperationException($"NO INFO");           
+                throw new InvalidOperationException($"No user Info");
 
             var user = await _userManager.FindByEmailAsync(payload.Email);
             if (user == null)
@@ -64,7 +68,7 @@ namespace Ecommerce.Services.Implementations
                     FirstName = payload.GivenName,
                     LastName = payload.FamilyName,
                     Active = true,
-                    UserType = UserType.User
+                    UserType = UserType.User,
                 };
                 newuser.EmailConfirmed = true;
 
@@ -74,6 +78,10 @@ namespace Ecommerce.Services.Implementations
                     var message = $"Failed to create user: {(result.Errors.FirstOrDefault())?.Description}";
                     throw new InvalidOperationException(message);
                 }
+
+                var cart = new Cart();
+                var key = $"cart:{newuser.Id}";
+                await _cacheService.WriteToCache(key, cart, null, TimeSpan.FromDays(365));
 
                 var role = UserType.User.GetStringValue();
                 bool roleExists = await _roleManager.RoleExistsAsync(role);
@@ -114,7 +122,7 @@ namespace Ecommerce.Services.Implementations
                 FullName = newUserFullname,
                 TwoFactor = false,
                 IsExisting = true
-                
+
             };
         }
 
@@ -139,7 +147,7 @@ namespace Ecommerce.Services.Implementations
             var info = new UserLoginInfo("Facebook", payload.Id, "Facebook");
             if (info == null)
                 throw new InvalidOperationException($"NO INFO");
-            
+
             var user = await _userManager.FindByEmailAsync(payload.Email);
             if (user == null)
             {
@@ -151,7 +159,7 @@ namespace Ecommerce.Services.Implementations
                     FirstName = payload.FirstName,
                     LastName = payload.LastName,
                     Active = true,
-                    UserType = UserType.User
+                    UserType = UserType.User,
                 };
                 newuser.EmailConfirmed = true;
 
@@ -161,6 +169,9 @@ namespace Ecommerce.Services.Implementations
                     var message = $"Failed to create user: {(result.Errors.FirstOrDefault())?.Description}";
                     throw new InvalidOperationException(message);
                 }
+                var cart = new Cart();
+                var key = $"cart:{newuser.Id}";
+                await _cacheService.WriteToCache(key, cart, null, TimeSpan.FromDays(365));
 
                 var role = UserType.User.GetStringValue();
                 bool roleExists = await _roleManager.RoleExistsAsync(role);
@@ -184,7 +195,7 @@ namespace Ecommerce.Services.Implementations
                     FullName = newUserFullname,
                     TwoFactor = false,
                     IsExisting = false,
-                    
+
                 };
             }
 
@@ -201,7 +212,7 @@ namespace Ecommerce.Services.Implementations
                 FullName = fullname,
                 TwoFactor = false,
                 IsExisting = true
-                
+
             };
         }
 
@@ -220,6 +231,7 @@ namespace Ecommerce.Services.Implementations
 
             ApplicationUser user = new()
             {
+                Id = Guid.NewGuid(),
                 Email = request.Email,
                 UserName = request.Email,
                 FirstName = request.Firstname,
@@ -238,6 +250,9 @@ namespace Ecommerce.Services.Implementations
                 throw new InvalidOperationException(message);
             }
 
+            var cart = new Cart();
+            var key = $"cart:{user.Id}";
+            await _cacheService.WriteToCache(key, cart, null, TimeSpan.FromDays(365));
 
             var role = UserType.User.GetStringValue();
             bool roleExists = await _roleManager.RoleExistsAsync(role);
@@ -314,33 +329,6 @@ namespace Ecommerce.Services.Implementations
                 Success = true,
             };
         }
-    }
-
-
-    public class SuccessResponse
-    {
-        public bool Success { get; set; }
-        public object Data { get; set; }
-    }
-
-    public class ChangePasswordRequest
-    {
-
-        [Required, DataType(DataType.Password)]
-        public string CurrentPassword { get; set; }
-
-        [Required, DataType(DataType.Password)]
-        public string NewPassword { get; set; }
-    }
-
-
-    public class LoginRequest
-    {
-        [Required, DataType(DataType.EmailAddress)]
-        public string Email { get; set; }
-
-        [Required, DataType(DataType.Password)]
-        public string Password { get; set; }
     }
 
 }

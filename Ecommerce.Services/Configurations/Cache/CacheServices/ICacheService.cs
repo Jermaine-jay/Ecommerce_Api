@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TaskManager.Services.Configurations.Cache.CacheServices
+namespace Ecommerce.Services.Configurations.Cache.CacheServices
 {
     public interface ICacheService
     {

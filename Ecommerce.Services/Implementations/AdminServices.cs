@@ -2,6 +2,7 @@
 using Ecommerce.Models.Dtos.Requests;
 using Ecommerce.Models.Dtos.Responses;
 using Ecommerce.Models.Entities;
+using Ecommerce.Services.Infrastructure;
 using Ecommerce.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using System.Net;
@@ -14,27 +15,20 @@ namespace Ecommerce.Services.Implementations
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IRepository<ApplicationUser> _userRepo;
         private readonly IRepository<Category> _categoryRepo;
-        private readonly IRepository<Product> _productRepo;
-        private readonly IRepository<ProductImage> _productImagesRepo;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly Ecommerce.Services.Infrastructure.Cloudinary _cloudinary;
 
 
-        public AdminService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, Ecommerce.Services.Infrastructure.Cloudinary cloudinary)
+        public AdminService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _categoryRepo = _unitOfWork.GetRepository<Category>();
-            _productRepo = _unitOfWork.GetRepository<Product>();
-            _productImagesRepo = _unitOfWork.GetRepository<ProductImage>();
             _userRepo = _unitOfWork.GetRepository<ApplicationUser>();
-            _cloudinary = cloudinary;
         }
 
 
         public async Task<CreateCategoryResponse> CreateCategory(CreateCategoryRequest request)
         {
-
             var category = await _categoryRepo.GetSingleByAsync(p => p.Name == request.Name.ToLower());
             if (category != null)
                 throw new InvalidOperationException("Category Name already exist");
@@ -53,12 +47,13 @@ namespace Ecommerce.Services.Implementations
             };
         }
 
+
         public async Task<SuccessResponse> UpdateCategory(string CategoryId, string name)
         {
             var category = await _categoryRepo.GetSingleByAsync(u => u.Id.ToString() == CategoryId) ??
                 throw new InvalidOperationException("Category does not exist");
 
-            category.Name = name;
+            category.Name = name.ToLower();
             category.UpdatedAt = DateTime.Now;
 
             await _categoryRepo.UpdateAsync(category);
@@ -68,6 +63,7 @@ namespace Ecommerce.Services.Implementations
                 Data = category.Name
             };
         }
+
 
         public async Task<SuccessResponse> GetAllCategories()
         {
@@ -80,6 +76,7 @@ namespace Ecommerce.Services.Implementations
                 Data = categories
             };
         }
+
 
         public async Task<SuccessResponse> GetUsers()
         {
@@ -107,6 +104,7 @@ namespace Ecommerce.Services.Implementations
             };
         }
 
+
         public async Task<ApplicationUserDto> GetUser(string userId)
         {
             var user = await _userRepo.GetSingleByAsync(user => user.Id.ToString() == userId);
@@ -127,6 +125,7 @@ namespace Ecommerce.Services.Implementations
             };
         }
 
+
         public async Task<SuccessResponse> DeleteUser(string userId)
         {
             var user = await _userRepo.GetSingleByAsync(user => user.Id.ToString() == userId);
@@ -139,6 +138,7 @@ namespace Ecommerce.Services.Implementations
                 Success = true
             };
         }
+
 
         public async Task<SuccessResponse> LockUser(LockUserRequest request)
         {

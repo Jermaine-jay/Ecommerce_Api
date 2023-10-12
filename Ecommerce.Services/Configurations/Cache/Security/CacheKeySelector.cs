@@ -1,8 +1,8 @@
 ﻿using Ecommerce.Services.Utilities;
 using System.Text;
-using TaskManager.Services.Configurations.Cache.Otp;
+using Ecommerce.Services.Configurations.Cache.Otp;
 
-namespace TaskManager.Services.Configurations.Cache.Security
+namespace Ecommerce.Services.Configurations.Cache.Security
 {
     public class CacheKeySelector
     {
