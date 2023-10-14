@@ -78,7 +78,6 @@ namespace Ecommerce_Api.Controllers
 
 
 
-        [AllowAnonymous]
         [HttpPost("change-password")]
         [SwaggerOperation(Summary = "Change user password")]
         [SwaggerResponse(StatusCodes.Status200OK, Description = "user token", Type = typeof(SuccessResponse))]

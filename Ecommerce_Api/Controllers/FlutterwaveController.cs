@@ -29,7 +29,7 @@ namespace Ecommerce_Api.Controllers
         [SwaggerResponse(StatusCodes.Status200OK, Description = "Transaction Details", Type = typeof(FlutterTransactionResponse))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Transaction Details", Type = typeof(TransactionResponse))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "Transaction Details", Type = typeof(TransactionResponse))]
-        public async Task<IActionResult> PaystackPayment([FromForm] FlutterPaymentRequest request)
+        public async Task<IActionResult> FlutterwavePayment([FromForm] FlutterPaymentRequest request)
         {
             string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
             var response = await _flutterwavePaymentService.FlutterPayment(userId, request);

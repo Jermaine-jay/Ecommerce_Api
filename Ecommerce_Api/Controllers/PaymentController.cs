@@ -18,7 +18,6 @@ namespace Ecommerce_Api.Controllers
         }
 
 
-
         [AllowAnonymous]
         [HttpPost("available-system", Name = "available-system")]
         [SwaggerOperation(Summary = "Check available payment platform")]
