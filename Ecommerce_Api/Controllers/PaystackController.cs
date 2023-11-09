@@ -23,7 +23,7 @@ namespace Ecommerce_Api.Controllers
         }
 
 
-        //[AllowAnonymous]
+  
         [HttpPost("paystackpayment", Name = "paystackpayment")]
         [SwaggerOperation(Summary = "paystack payment system")]
         [SwaggerResponse(StatusCodes.Status200OK, Description = "Transaction Details", Type = typeof(TransactionResponse))]
@@ -42,7 +42,6 @@ namespace Ecommerce_Api.Controllers
         }
 
 
-        //[AllowAnonymous]
         [HttpGet("verifypaystackpayment", Name = "verifypaystackpayment")]
         [SwaggerOperation(Summary = "verify paystack payment system")]
         [SwaggerResponse(StatusCodes.Status200OK, Description = "Verification Details", Type = typeof(VerifyTransactionResponse))]
@@ -55,8 +54,6 @@ namespace Ecommerce_Api.Controllers
         }
 
 
-
-        //[AllowAnonymous]
         [HttpPost("paystack-bank-charge", Name = "paystack-bank-charge")]
         [SwaggerOperation(Summary = "paystack bankchargepayment payment system")]
         [SwaggerResponse(StatusCodes.Status200OK, Description = "Transaction Details", Type = typeof(ChargeResponse))]
@@ -74,8 +71,6 @@ namespace Ecommerce_Api.Controllers
         }
 
 
-
-        //[AllowAnonymous]
         [HttpGet("verifybankcharge", Name = "verifybankcharge")]
         [SwaggerOperation(Summary = "verify paystack bank charge payment")]
         [SwaggerResponse(StatusCodes.Status200OK, Description = "Transaction Details", Type = typeof(ChargeResponse))]
@@ -88,8 +83,6 @@ namespace Ecommerce_Api.Controllers
         }
 
 
-
-        //[AllowAnonymous]
         [HttpPost("directcardpayment", Name = "directcardpayment")]
         [SwaggerOperation(Summary = "direct card payment")]
         [SwaggerResponse(StatusCodes.Status200OK, Description = "Transaction Details", Type = typeof(TransactionResponse))]
@@ -103,8 +96,6 @@ namespace Ecommerce_Api.Controllers
         }
 
 
-
-        //[AllowAnonymous]
         [HttpGet("available-banks", Name = "available-banks")]
         [SwaggerOperation(Summary = "list available banks")]
         [SwaggerResponse(StatusCodes.Status200OK, Description = "Banks Details", Type = typeof(BankResponse))]
@@ -117,8 +108,6 @@ namespace Ecommerce_Api.Controllers
         }
 
 
-
-        //[AllowAnonymous]
         [HttpPost("get-account", Name = "get-account")]
         [SwaggerOperation(Summary = "get existing account")]
         [SwaggerResponse(StatusCodes.Status200OK, Description = "account Details", Type = typeof(ResolveAccountResponse))]

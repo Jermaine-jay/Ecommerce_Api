@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
+
 namespace Ecommerce.Services.Implementations
 {
     public class AuthServices : IAuthServices
@@ -20,7 +21,6 @@ namespace Ecommerce.Services.Implementations
         private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
         private readonly ICacheService _cacheService;
-
 
 
         public AuthServices(UserManager<ApplicationUser> userManager, IConfiguration configuration, RoleManager<ApplicationRole> roleManager,
@@ -34,6 +34,7 @@ namespace Ecommerce.Services.Implementations
             _cacheService = cacheService;
         }
 
+
         public async Task<object> ChangeSocialDetails()
         {
             var input = "AUTHORIZATION WORKS";
@@ -43,7 +44,7 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<AuthenticationResponse> GoogleAuth(string credential)
         {
-
+            
             var settings = new GoogleJsonWebSignature.ValidationSettings()
             {
                 Audience = new List<string>() { _configuration["Authentication:Google:ClientId"] }
@@ -125,7 +126,6 @@ namespace Ecommerce.Services.Implementations
 
             };
         }
-
 
         public async Task<AuthenticationResponse> FaceBookAuth(string credential)
         {
@@ -216,7 +216,6 @@ namespace Ecommerce.Services.Implementations
             };
         }
 
-
         public async Task<ApplicationUser> RegisterUser(UserRegistrationRequest request)
         {
             ApplicationUser? existingUser = await _userManager.FindByEmailAsync(request.Email);
@@ -268,7 +267,6 @@ namespace Ecommerce.Services.Implementations
             return user;
         }
 
-
         public async Task<AuthenticationResponse> UserLogin(LoginRequest request)
         {
             ApplicationUser? user = await _userManager.FindByEmailAsync(request.Email.ToLower().Trim());
@@ -313,7 +311,6 @@ namespace Ecommerce.Services.Implementations
             };
 
         }
-
 
         public async Task<SuccessResponse> ChangePassword(string userId, ChangePasswordRequest request)
         {

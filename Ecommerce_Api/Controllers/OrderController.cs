@@ -30,7 +30,7 @@ namespace Ecommerce_Api.Controllers
         public async Task<IActionResult> GetUser()
         {
             string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
-            var response = await _orderService.ClearCart("994f5f3d-f22b-407e-8016-ee7ed508da4e");
+            var response = await _orderService.ClearCart(userId);
             return Ok(response);
         }
 

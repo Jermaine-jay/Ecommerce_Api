@@ -93,7 +93,6 @@ namespace Ecommerce.Services.Implementations
             };
         }
 
-
         public async Task<SuccessResponse> DeleteProduct(string productId)
         {
             var product = await _productRepo.GetSingleByAsync(u => u.Id.ToString() == productId, include: u => u.Include(p => p.ProductVariation));
@@ -114,7 +113,6 @@ namespace Ecommerce.Services.Implementations
             await _productRepo.DeleteAsync(product);
             return new SuccessResponse { Success = true };
         }
-
 
         public async Task<SuccessResponse> UpdateStock(string productvariationId, int stock)
         {
@@ -172,7 +170,6 @@ namespace Ecommerce.Services.Implementations
             return uploadResults;
         }
 
-
         public async Task<SuccessResponse> AddVariations(ProductVarionRequest request)
         {
             var product = await _productRepo.GetSingleByAsync(p => p.Id.ToString() == request.ProductId, include: u=> u.Include(u=>u.ProductVariation))
@@ -227,7 +224,6 @@ namespace Ecommerce.Services.Implementations
             };
         }
 
-
         public async Task<SuccessResponse> DeleteImage(string publicId)
         {
             var image = await _productImagesRepo.GetSingleByAsync(image => image.PublicId == publicId, include: u => u.Include(p => p.ProductVariation));
@@ -242,7 +238,6 @@ namespace Ecommerce.Services.Implementations
 
             return new SuccessResponse { Success = true };
         }
-
 
         public async Task<IEnumerable<Product>> GetProductsAsync()
         {
@@ -270,7 +265,6 @@ namespace Ecommerce.Services.Implementations
             });
 
         }
-
 
         public async Task<ProductDto> GetProductAsync(string productId)
         {

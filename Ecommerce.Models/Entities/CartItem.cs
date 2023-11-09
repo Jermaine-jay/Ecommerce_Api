@@ -4,6 +4,7 @@ namespace Ecommerce.Models.Entities
 {
     public class CartItem : BaseEntity
     {
+        public string? ProductId { get; set; }
         public string? ProductName { get; set; }
         public string? ProductImage { get; set; }
         public Guid? CartId { get; set; }

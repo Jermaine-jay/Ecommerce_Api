@@ -28,7 +28,7 @@ namespace Ecommerce_Api.Controllers
         {
             var response = await _paymentService.AvailableSystem();
             if(response == "paystack")
-                return RedirectToAction("paystackpayment", "Paystack");
+                return RedirectToAction("PaystackCardPayment", "Paystack");
 
             if(response == "flutter")
                 return RedirectToAction("flutterwavepayment", "Flutterwave");

@@ -13,9 +13,7 @@ namespace Ecommerce.Services.Implementations
     public class OrderService : IOrderService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IRepository<ApplicationUser> _userRepo;
         private readonly IRepository<Order> _orderRepo;
-        private readonly IRepository<OrderItem> _orderItemRepo;
         private readonly IRepository<ProductVariation> _variationRepo;
         private readonly IRepository<Product> _productRepo;
         private readonly ICacheService _cacheService;
@@ -27,9 +25,7 @@ namespace Ecommerce.Services.Implementations
             _unitOfWork = unitOfWork;
             _cacheService = cacheService;
             _userManager = userManager;
-            _userRepo = _unitOfWork.GetRepository<ApplicationUser>();
             _orderRepo = _unitOfWork.GetRepository<Order>();
-            _orderItemRepo = _unitOfWork.GetRepository<OrderItem>();
             _variationRepo = _unitOfWork.GetRepository<ProductVariation>();
             _productRepo = _unitOfWork.GetRepository<Product>();
         }
@@ -37,12 +33,13 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<SuccessResponse> ClearCart(string userId)
         {
-            var user = await _userRepo.GetSingleByAsync(u => u.Id.ToString() == userId)
+            var user = await _userManager.FindByIdAsync(userId)
                 ?? throw new InvalidOperationException("User does not exist");
 
             var key = $"cart:{user.Id}";
             var cart = await _cacheService.ReadFromCache<Cart>(key)
                 ?? throw new InvalidOperationException("User cart not found");
+
 
             var order = new Order
             {
@@ -64,12 +61,12 @@ namespace Ecommerce.Services.Implementations
             };
 
             await _orderRepo.AddAsync(order);
-            /* foreach (var item in cart.CartItems.ToList())
-             {
-                 cart.CartItems.Remove(item);
-             }
+            foreach (var item in cart.CartItems.ToList())
+            {
+                cart.CartItems.Remove(item);
+            }
 
-             await _cacheService.WriteToCache(key, cart, null, TimeSpan.FromDays(365));*/
+            await _cacheService.WriteToCache(key, cart, null, TimeSpan.FromDays(365));
             return new SuccessResponse
             {
                 Success = true,
@@ -77,11 +74,10 @@ namespace Ecommerce.Services.Implementations
             };
         }
 
-
         public async Task<OrderResponse> CreateOrder(string userId, OrderRequest request)
         {
-            var user = await _userRepo.GetSingleByAsync(u => u.Id.Equals(userId))
-                ?? throw new InvalidOperationException("User does not exist");
+            var user = await _userManager.FindByIdAsync(userId)
+                 ?? throw new InvalidOperationException("User does not exist");
 
             var variation = await _variationRepo.GetSingleByAsync(pv => pv.Id.Equals(request.VariationId))
                 ?? throw new InvalidOperationException("product does not exist");
@@ -95,7 +91,6 @@ namespace Ecommerce.Services.Implementations
                 UnitPrice = variation.Price,
                 OrderId = id,
             };
-
 
             var order = new Order
             {
@@ -127,7 +122,6 @@ namespace Ecommerce.Services.Implementations
 
             return result;
         }
-
 
         public async Task<OrderResponse> ShippingAddress(ShippingAddressRequest request)
         {

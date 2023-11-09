@@ -16,7 +16,6 @@ namespace Ecommerce.Services.Implementations
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IRepository<ApplicationUser> _userRepo;
-        //private readonly INotificationService _notificationService;
         private readonly IRepository<ProductVariation> _productVariationRepo;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICacheService _cacheService;
@@ -57,7 +56,6 @@ namespace Ecommerce.Services.Implementations
             };
         }
 
-
         public async Task<ProfileResponse> Profile(string userId)
         {
             var user = await _userRepo.GetSingleByAsync(user => user.Id.ToString() == userId)
@@ -71,7 +69,6 @@ namespace Ecommerce.Services.Implementations
                 PhoneNumber = user.PhoneNumber,
             };
         }
-
 
         public async Task<SuccessResponse> UpdateAccount(string userId, UpdateUserRequest request)
         {
@@ -100,6 +97,17 @@ namespace Ecommerce.Services.Implementations
             var cart = await _cacheService.ReadFromCache<Cart>(key)
                 ?? throw new InvalidOperationException("User cart Not Found");
 
+           
+            foreach(var item in cart.CartItems)
+            {
+                var prod = await _productVariationRepo.GetAllAsync(include: u => u.Include(u => u.ProductImages));
+                var result = prod.Where(pr => pr.Id.ToString() == item.ProductId.ToString()).FirstOrDefault();
+                _ = item.UnitPrice != result.Price ? item.UnitPrice = result.Price : item.UnitPrice = result.Price;
+
+                await _cacheService.WriteToCache<Cart>(key, cart,null, TimeSpan.FromDays(365));          
+            };
+
+
             if (cart?.CartItems != null)
             {
                 var result = new Cart
@@ -116,7 +124,6 @@ namespace Ecommerce.Services.Implementations
                 };
                 return result;
             }
-
             return cart;
         }
 
@@ -128,7 +135,6 @@ namespace Ecommerce.Services.Implementations
 
             var key = $"cart:{user.Id}";
             var cart = await _cacheService.ReadFromCache<Cart>(key);
-            //?? throw new InvalidOperationException("cart Not Found");
 
             var productvar = await _productVariationRepo.GetSingleByAsync(u => u.ProductId.ToString().Equals(request.ProductId), include: img => img.Include(i => i.ProductImages))
                 ?? throw new InvalidOperationException("Product Not Found");
@@ -164,13 +170,13 @@ namespace Ecommerce.Services.Implementations
             var cartitem = new CartItem
             {
                 Id = Guid.NewGuid(),
-                /*ProductImage = productvar.ProductImages.FirstOrDefault().Url,
-                ProductName = productvar.Product.Name,*/
+                ProductId = productvar.Id.ToString(),
+                ProductImage = productvar.ProductImages.FirstOrDefault().Url,
+                ProductName = productvar.Product.Name,
                 CartId = cart.Id,
                 Quantity = request.Quantity,
                 Colour = colour,
-                //UnitPrice = productvar.Price,
-                UnitPrice = 150000,
+                UnitPrice = productvar.Price,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
             };
@@ -193,7 +199,6 @@ namespace Ecommerce.Services.Implementations
             };
 
         }
-
 
         public async Task<SuccessResponse> DeleteFromCart(string userId, string cartitemId)
         {
@@ -218,7 +223,6 @@ namespace Ecommerce.Services.Implementations
                 Success = true,
             };
         }
-
 
         public async Task<SuccessResponse> DeleteCartItems(string userId)
         {

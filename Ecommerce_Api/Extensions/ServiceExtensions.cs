@@ -77,7 +77,7 @@ namespace Ecommerce_Api.Extensions
                 {
                     options.ClientId = configuration["Authentication:Google:ClientId"];
                     options.ClientSecret = configuration["Authentication:Google:ClientSecret"];
-                });
+                });                           
         }
 
 
