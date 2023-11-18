@@ -3,16 +3,20 @@ using Ecommerce.Data.Implementations;
 using Ecommerce.Data.Interfaces;
 using Ecommerce.Models.Entities;
 using Ecommerce.Services.Configurations.Cache.CacheServices;
+using Ecommerce.Services.Configurations.Cache.Security;
 using Ecommerce.Services.Configurations.Jwt;
 using Ecommerce.Services.Implementations;
 using Ecommerce.Services.Interfaces;
+using Ecommerce_Api.Attribute;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
 using System.Security.Authentication;
 using System.Text;
+using TaskManager.Services.Implementations;
 
 
 namespace Ecommerce_Api.Extensions
@@ -28,8 +32,12 @@ namespace Ecommerce_Api.Extensions
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<IRoleClaimService, RoleClaimService>();
+            services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IAuthorizationHandler, AuthHandler>();
             services.AddScoped<IPaystackPaymentService, PaystackPaymentService>();
+            services.AddScoped<ILoginAttempt, LoginAttempt>();
             services.AddScoped<IFlutterwavePaymentService, FlutterwavePaymentService>();
         }
 
@@ -77,9 +85,8 @@ namespace Ecommerce_Api.Extensions
                 {
                     options.ClientId = configuration["Authentication:Google:ClientId"];
                     options.ClientSecret = configuration["Authentication:Google:ClientSecret"];
-                });                           
+                });
         }
-
 
         public static void ConfigureJWT(this IServiceCollection services, JwtConfig jwtConfig)
         {
@@ -109,16 +116,14 @@ namespace Ecommerce_Api.Extensions
                 };
             });
 
-            /* services.AddAuthorization(options =>
-             {
-                 options.AddPolicy("Authorization", policy =>
-                 {
-                     policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
-                     policy.RequireAuthenticatedUser();
-                     //policy.Requirements.Add(new AuthRequirement());
-                     policy.Build();
-                 });
-             });*/
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Authorization", policy =>
+                {
+                    policy.Requirements.Add(new AuthRequirement());
+                });
+            });
+
         }
 
         public static void AddRedisCache(this IServiceCollection services, RedisConfig redisConfig)
@@ -146,7 +151,7 @@ namespace Ecommerce_Api.Extensions
                     EndPoints = { configurationOptions.EndPoints[0] },
                     AbortOnConnectFail = false,
                     AllowAdmin = false,
-                    ClientName = redisConfig.InstanceId
+                    ClientName = redisConfig.Username
                 });
                 return connectionMultiplexer;
             });

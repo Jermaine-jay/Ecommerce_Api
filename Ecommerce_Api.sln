@@ -3,17 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33712.159
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ecommerce_Api", "Ecommerce_Api\Ecommerce_Api.csproj", "{83659409-1FC8-4630-B96A-37DEC491420B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ecommerce_Api", "Ecommerce_Api\Ecommerce_Api.csproj", "{83659409-1FC8-4630-B96A-37DEC491420B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ecommerce.Data", "Ecommerce.Data\Ecommerce.Data.csproj", "{7B9A64E6-1531-4479-BE5D-F123DBD2A88F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ecommerce.Data", "Ecommerce.Data\Ecommerce.Data.csproj", "{7B9A64E6-1531-4479-BE5D-F123DBD2A88F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ecommerce.Services", "Ecommerce.Services\Ecommerce.Services.csproj", "{AABDA386-E3B7-433A-8C2D-06F534688806}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ecommerce.Services", "Ecommerce.Services\Ecommerce.Services.csproj", "{AABDA386-E3B7-433A-8C2D-06F534688806}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ecommerce.Cache", "Ecommerce.Cache\Ecommerce.Cache.csproj", "{FFF02192-4138-47AE-A6D3-C92B869137A4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ecommerce.Cache", "Ecommerce.Cache\Ecommerce.Cache.csproj", "{FFF02192-4138-47AE-A6D3-C92B869137A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ecommerce.Migrations", "Ecommerce.Migrations\Ecommerce.Migrations.csproj", "{C29702D8-8350-4DEA-859F-EA91633303AC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ecommerce.Migrations", "Ecommerce.Migrations\Ecommerce.Migrations.csproj", "{C29702D8-8350-4DEA-859F-EA91633303AC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ecommerce.Models", "Ecommerce.Models\Ecommerce.Models.csproj", "{1C705158-7BB4-407C-8754-FBE206ED2E6F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ecommerce.Models", "Ecommerce.Models\Ecommerce.Models.csproj", "{1C705158-7BB4-407C-8754-FBE206ED2E6F}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{D90D249B-2D3F-441D-B8F7-B7070840B75A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{1C705158-7BB4-407C-8754-FBE206ED2E6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C705158-7BB4-407C-8754-FBE206ED2E6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1C705158-7BB4-407C-8754-FBE206ED2E6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D90D249B-2D3F-441D-B8F7-B7070840B75A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D90D249B-2D3F-441D-B8F7-B7070840B75A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D90D249B-2D3F-441D-B8F7-B7070840B75A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D90D249B-2D3F-441D-B8F7-B7070840B75A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

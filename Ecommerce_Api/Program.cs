@@ -1,10 +1,12 @@
+using Ecommerce.Data.Seeds;
 using Ecommerce.Services.Configurations.Cache.CacheServices;
 using Ecommerce.Services.Configurations.Jwt;
 using Ecommerce.Services.Infrastructure;
 using Ecommerce_Api.Extensions;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-
+using TaskManager.Data.Seeds;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -105,12 +107,20 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("CorsPolicy");
 app.UseRouting();
+app.ConfigureException(builder.Environment);
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.All
+});
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 
 app.MapControllers();
-app.ConfigureException(builder.Environment);
+
+await app.SeedRole();
+await app.ClaimSeeder();
 //await app.ProductSeeder();
 
 app.Run();

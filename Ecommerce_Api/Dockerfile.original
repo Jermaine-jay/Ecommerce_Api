@@ -8,11 +8,6 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["Ecommerce_Api/Ecommerce_Api.csproj", "Ecommerce_Api/"]
-COPY ["Ecommerce.Cache/Ecommerce.Cache.csproj", "Ecommerce.Cache/"]
-COPY ["Ecommerce.Data/Ecommerce.Data.csproj", "Ecommerce.Data/"]
-COPY ["Ecommerce.Models/Ecommerce.Models.csproj", "Ecommerce.Models/"]
-COPY ["Ecommerce.Migrations/Ecommerce.Migrations.csproj", "Ecommerce.Migrations/"]
-COPY ["Ecommerce.Services/Ecommerce.Services.csproj", "Ecommerce.Services/"]
 RUN dotnet restore "Ecommerce_Api/Ecommerce_Api.csproj"
 COPY . .
 WORKDIR "/src/Ecommerce_Api"

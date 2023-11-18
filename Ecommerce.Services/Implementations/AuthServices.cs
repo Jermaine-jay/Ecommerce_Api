@@ -4,6 +4,7 @@ using Ecommerce.Models.Dtos.Responses;
 using Ecommerce.Models.Entities;
 using Ecommerce.Models.Enums;
 using Ecommerce.Services.Configurations.Cache.CacheServices;
+using Ecommerce.Services.Configurations.Cache.Security;
 using Ecommerce.Services.Interfaces;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
@@ -21,10 +22,11 @@ namespace Ecommerce.Services.Implementations
         private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
         private readonly ICacheService _cacheService;
+        private readonly ILoginAttempt _loginAttempt;
 
 
         public AuthServices(UserManager<ApplicationUser> userManager, IConfiguration configuration, RoleManager<ApplicationRole> roleManager,
-            IJwtAuthenticator jwtAuthenticator, HttpClient httpClient, ICacheService cacheService)
+            IJwtAuthenticator jwtAuthenticator, HttpClient httpClient, ICacheService cacheService, ILoginAttempt loginAttempt)
         {
             _userManager = userManager;
             _configuration = configuration;
@@ -32,6 +34,7 @@ namespace Ecommerce.Services.Implementations
             _jwtAuthenticator = jwtAuthenticator;
             _httpClient = httpClient;
             _cacheService = cacheService;
+            _loginAttempt = loginAttempt;
         }
 
 
@@ -250,7 +253,7 @@ namespace Ecommerce.Services.Implementations
             }
 
             var cart = new Cart();
-            var key = $"cart:{user.Id}";
+            var key = CacheKeySelector.UserCartCacheKey(user.Id.ToString());
             await _cacheService.WriteToCache(key, cart, null, TimeSpan.FromDays(365));
 
             var role = UserType.User.GetStringValue();
@@ -269,6 +272,7 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<AuthenticationResponse> UserLogin(LoginRequest request)
         {
+            var maxAttempt = 5;
             ApplicationUser? user = await _userManager.FindByEmailAsync(request.Email.ToLower().Trim());
             if (user == null)
                 throw new InvalidOperationException("Invalid username or password");
@@ -282,19 +286,23 @@ namespace Ecommerce.Services.Implementations
             if (user.LockoutEnd != null)
                 throw new InvalidOperationException($"User Suspended. Time Left {user.LockoutEnd - DateTimeOffset.UtcNow}");
 
-            bool result = await _userManager.CheckPasswordAsync(user, request.Password);
-            if (!result)
-            {
-                user.AccessFailedCount++;
-                throw new InvalidOperationException("Invalid username or password");
-            }
-
-            if (user.AccessFailedCount == 5)
+            var key = await _loginAttempt.LoginAttemptAsync(user.Id.ToString());
+            var check = await _loginAttempt.CheckLoginAttemptAsync(user.Id.ToString());
+            if (check.Attempts == maxAttempt)
             {
                 DateTimeOffset lockoutEnd = DateTimeOffset.UtcNow.AddSeconds(300);
                 user.LockoutEnd = lockoutEnd;
-                await _userManager.ResetAccessFailedCountAsync(user);
+                await _userManager.UpdateAsync(user);
+                await _loginAttempt.ResetLoginAttemptAsync(user.Id.ToString());
                 throw new InvalidOperationException($"Account locked, Time Left {user.LockoutEnd - DateTimeOffset.UtcNow}");
+            }
+
+            bool result = await _userManager.CheckPasswordAsync(user, request.Password);
+            if (!result)
+            {
+                check.Attempts += 5;
+                await _cacheService.WriteToCache(key, check, null, TimeSpan.FromDays(365));
+                throw new InvalidOperationException("Invalid username or password");
             }
 
             JwtToken userToken = await _jwtAuthenticator.GenerateJwtToken(user);

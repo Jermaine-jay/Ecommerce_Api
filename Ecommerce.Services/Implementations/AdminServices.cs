@@ -2,7 +2,6 @@
 using Ecommerce.Models.Dtos.Requests;
 using Ecommerce.Models.Dtos.Responses;
 using Ecommerce.Models.Entities;
-using Ecommerce.Services.Infrastructure;
 using Ecommerce.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using System.Net;

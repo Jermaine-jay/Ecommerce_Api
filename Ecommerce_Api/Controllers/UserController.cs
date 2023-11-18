@@ -1,10 +1,8 @@
 ﻿using Ecommerce.Models.Dtos.Requests;
 using Ecommerce.Models.Dtos.Responses;
 using Ecommerce.Models.Entities;
-using Ecommerce.Services.Implementations;
 using Ecommerce.Services.Interfaces;
 using Ecommerce_Api.Extensions;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 

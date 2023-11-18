@@ -3,5 +3,7 @@
     public enum CacheKeyPrefix
     {
         OtpCode = 1,
+        LoginAttempt,
+        UserCrt
     }
 }

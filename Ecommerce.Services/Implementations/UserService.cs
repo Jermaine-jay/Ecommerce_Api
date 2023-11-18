@@ -4,6 +4,7 @@ using Ecommerce.Models.Dtos.Responses;
 using Ecommerce.Models.Entities;
 using Ecommerce.Models.Enums;
 using Ecommerce.Services.Configurations.Cache.CacheServices;
+using Ecommerce.Services.Configurations.Cache.Security;
 using Ecommerce.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -42,7 +43,6 @@ namespace Ecommerce.Services.Implementations
                 Success = true,
             };
         }
-
 
         public async Task<SuccessResponse> DeleteAccount(string userId)
         {
@@ -87,13 +87,12 @@ namespace Ecommerce.Services.Implementations
             };
         }
 
-
         public async Task<Cart> GetCart(string userId)
         {
             var user = await _userRepo.GetSingleByAsync(user => user.Id.ToString() == userId)
                 ?? throw new InvalidOperationException("User Not Found");
 
-            var key = $"cart:{user.Id}";
+            var key = CacheKeySelector.UserCartCacheKey(user.Id.ToString());
             var cart = await _cacheService.ReadFromCache<Cart>(key)
                 ?? throw new InvalidOperationException("User cart Not Found");
 
@@ -127,13 +126,12 @@ namespace Ecommerce.Services.Implementations
             return cart;
         }
 
-
         public async Task<CartItemResponse> AddToCart(string userId, AddToCartRequest request)
         {
             var user = await _userRepo.GetSingleByAsync(user => user.Id.ToString() == userId)
                 ?? throw new InvalidOperationException("User cart Not Found");
 
-            var key = $"cart:{user.Id}";
+            var key = CacheKeySelector.UserCartCacheKey(user.Id.ToString());
             var cart = await _cacheService.ReadFromCache<Cart>(key);
 
             var productvar = await _productVariationRepo.GetSingleByAsync(u => u.ProductId.ToString().Equals(request.ProductId), include: img => img.Include(i => i.ProductImages))
@@ -205,7 +203,7 @@ namespace Ecommerce.Services.Implementations
             var user = await _userRepo.GetSingleByAsync(user => user.Id.ToString() == userId)
                 ?? throw new InvalidOperationException("User cart Not Found");
 
-            var key = $"cart:{user.Id}";
+            var key = CacheKeySelector.UserCartCacheKey(user.Id.ToString());
             var cart = await _cacheService.ReadFromCache<Cart>(key)
                 ?? throw new InvalidOperationException("User cart Not Found");
 
@@ -229,7 +227,7 @@ namespace Ecommerce.Services.Implementations
             var user = await _userRepo.GetSingleByAsync(user => user.Id.ToString() == userId)
                ?? throw new InvalidOperationException("User cart Not Found");
 
-            var key = $"cart:{user.Id}";
+            var key = CacheKeySelector.UserCartCacheKey(user.Id.ToString());
             var cart = await _cacheService.ReadFromCache<Cart>(key)
                 ?? throw new InvalidOperationException("User cart Not Found");
 

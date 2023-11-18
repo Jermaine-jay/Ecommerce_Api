@@ -1,6 +1,7 @@
 ﻿using Ecommerce.Models.Dtos.Requests;
 using Ecommerce.Models.Dtos.Responses;
 using Ecommerce.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -8,6 +9,8 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Ecommerce_Api.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize(Policy = "Authorization")]
+
     [ApiController]
     public class AdminController : ControllerBase
     {
