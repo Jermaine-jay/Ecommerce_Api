@@ -16,7 +16,6 @@ string? connectionString = builder.Configuration.GetConnectionString("DefaultCon
 builder.Services.RegisterDbContext(connectionString);
 builder.Services.RegisterServices();
 builder.Services.ConfigureIdentity();
-//builder.Services.ConfigureAuth(builder.Configuration);
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
 
