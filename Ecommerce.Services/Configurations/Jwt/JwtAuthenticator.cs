@@ -3,6 +3,7 @@ using Ecommerce.Models.Entities;
 using Ecommerce.Models.Enums;
 using Ecommerce.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -13,17 +14,17 @@ namespace Ecommerce.Services.Configurations.Jwt
 {
     public class JwtAuthenticator : IJwtAuthenticator
     {
-        private readonly JwtConfig _jwtConfig;
+        private readonly IConfiguration _config;
 
-        public JwtAuthenticator(JwtConfig jwtConfig)
+        public JwtAuthenticator(IConfiguration config)
         { 
-            _jwtConfig = jwtConfig;
+            _config = config;
         }
 
         public async Task<JwtToken> GenerateJwtToken(ApplicationUser user)
         {
             JwtSecurityTokenHandler jwtTokenHandler = new();
-            var key = Encoding.ASCII.GetBytes(_jwtConfig.Secret);
+            var key = Encoding.ASCII.GetBytes(_config["JwtConfig:Secret"]);
             string userRole = user.UserType.GetStringValue();
             IdentityOptions _options = new();
 
@@ -42,10 +43,10 @@ namespace Ecommerce.Services.Configurations.Jwt
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(_jwtConfig.Expires),
+                Expires = DateTime.UtcNow.AddMinutes(120),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
-                Issuer = _jwtConfig.Issuer,
-                Audience = _jwtConfig.Audience
+                Issuer = _config["JwtConfig:Issuer"],
+                Audience = _config["JwtConfig:Audience"]
             };
 
             var token = jwtTokenHandler.CreateToken(tokenDescriptor);

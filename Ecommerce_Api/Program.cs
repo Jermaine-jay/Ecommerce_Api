@@ -1,7 +1,4 @@
 using Ecommerce.Data.Seeds;
-using Ecommerce.Services.Configurations.Cache.CacheServices;
-using Ecommerce.Services.Configurations.Jwt;
-using Ecommerce.Services.Infrastructure;
 using Ecommerce_Api.Extensions;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
@@ -31,20 +28,8 @@ builder.Services.AddCors(opt =>
 });
 
 
-Settings setting = builder.Configuration.Get<Settings>()!;
-builder.Services.AddSingleton(setting);
-
-CloudinarySettings cloudinary = setting.CloudinarySettings;
-builder.Services.AddSingleton(cloudinary);
-
-JwtConfig jwtConfig = setting.JwtConfig;
-builder.Services.AddSingleton(jwtConfig);
-
-RedisConfig redisConfig = setting.redisConfig;
-builder.Services.AddSingleton(redisConfig);
-
-builder.Services.ConfigureJWT(jwtConfig);
-builder.Services.AddRedisCache(redisConfig);
+builder.Services.ConfigureJWT(builder.Configuration);
+builder.Services.AddRedisCache(builder.Configuration);
 
 builder.Services.AddAuthentication()
 

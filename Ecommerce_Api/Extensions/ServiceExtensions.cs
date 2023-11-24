@@ -88,10 +88,9 @@ namespace Ecommerce_Api.Extensions
                 });
         }
 
-        public static void ConfigureJWT(this IServiceCollection services, JwtConfig jwtConfig)
+        public static void ConfigureJWT(this IServiceCollection services, IConfiguration jwtConfig)
         {
-            var jwtSettings = jwtConfig;
-            var secretKey = jwtSettings.Secret;
+            var secretKey = jwtConfig["Secret"];
 
             services.AddAuthentication(opt =>
             {
@@ -110,8 +109,8 @@ namespace Ecommerce_Api.Extensions
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtSettings.Issuer,
-                    ValidAudience = jwtSettings.Audience,
+                    ValidIssuer = jwtConfig["JwtConfig:Issuer"],
+                    ValidAudience = jwtConfig["JwtConfig:Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey))
                 };
             });
@@ -126,21 +125,22 @@ namespace Ecommerce_Api.Extensions
 
         }
 
-        public static void AddRedisCache(this IServiceCollection services, RedisConfig redisConfig)
+        public static void AddRedisCache(this IServiceCollection services, IConfiguration redisConfig)
         {
 
             ConfigurationOptions configurationOptions = new ConfigurationOptions();
             configurationOptions.SslProtocols = SslProtocols.Tls12;
             configurationOptions.SyncTimeout = 30000;
             configurationOptions.Ssl = true;
-            configurationOptions.Password = redisConfig.Password;
+            configurationOptions.Password = redisConfig["RedisConfig:Password"];
             configurationOptions.AbortOnConnectFail = false;
-            configurationOptions.EndPoints.Add(redisConfig.Host, redisConfig.Port);
+            configurationOptions.EndPoints.Add(redisConfig["RedisConfig:Host"], int.Parse(redisConfig["RedisConfig:Port"]));
+            configurationOptions.User = redisConfig["user"];
 
             services.AddStackExchangeRedisCache(options =>
             {
                 options.Configuration = configurationOptions.ToString();
-                options.InstanceName = redisConfig.InstanceId;
+                options.InstanceName = redisConfig["RedisConfig:InstanceId"];
             });
 
             services.AddSingleton<IConnectionMultiplexer>((x) =>
@@ -151,7 +151,9 @@ namespace Ecommerce_Api.Extensions
                     EndPoints = { configurationOptions.EndPoints[0] },
                     AbortOnConnectFail = false,
                     AllowAdmin = false,
-                    ClientName = redisConfig.Username
+                    User = configurationOptions.User,
+                    Ssl = configurationOptions.Ssl,
+                    SslProtocols = configurationOptions.SslProtocols
                 });
                 return connectionMultiplexer;
             });

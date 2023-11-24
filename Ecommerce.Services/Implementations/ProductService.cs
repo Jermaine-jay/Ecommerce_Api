@@ -10,6 +10,7 @@ using Ecommerce.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Net;
 
@@ -22,17 +23,17 @@ namespace Ecommerce.Services.Implementations
         private readonly IRepository<ProductImage> _productImagesRepo;
         private readonly IRepository<ProductVariation> _productVariationRepo;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly CloudinarySettings _cloudinary;
+        private readonly IConfiguration _configuration;
 
 
-        public ProductService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, CloudinarySettings cloudinary)
+        public ProductService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _categoryRepo = _unitOfWork.GetRepository<Category>();
             _productRepo = _unitOfWork.GetRepository<Product>();
             _productImagesRepo = _unitOfWork.GetRepository<ProductImage>();
             _productVariationRepo = _unitOfWork.GetRepository<ProductVariation>();
-            _cloudinary = cloudinary;
+            _configuration = configuration;
         }
 
 
@@ -105,7 +106,7 @@ namespace Ecommerce.Services.Implementations
             if (!allvar.Any())
                 throw new InvalidOperationException("None Found");
 
-            var cloudinary = new CloudinaryDotNet.Cloudinary(new Account(_cloudinary.CloudName, _cloudinary.ApiKey, _cloudinary.ApiSecret));
+            var cloudinary = new CloudinaryDotNet.Cloudinary(new Account(_configuration["CloudinarySettings:CloudName"], _configuration["CloudinarySettings:ApiKey"], _configuration["CloudinarySettings:ApiSecret"]));
 
             var deletionParamsList = allvar.SelectMany(item => item.ProductImages.Select(image => new DeletionParams(image.PublicId))).ToList();
             await Task.WhenAll(deletionParamsList.Select(param => cloudinary.DestroyAsync(param)));
@@ -135,7 +136,7 @@ namespace Ecommerce.Services.Implementations
             if (files == null || !files.Any())
                 throw new InvalidOperationException("File cannot be empty");
 
-            var cloudinary = new Cloudinary(new Account(_cloudinary.CloudName, _cloudinary.ApiKey, _cloudinary.ApiSecret));
+            var cloudinary = new Cloudinary(new Account(_configuration["CloudinarySettings:CloudName"], _configuration["CloudinarySettings:ApiKey"], _configuration["CloudinarySettings:ApiSecret"]));
             if (cloudinary == null)
                 throw new InvalidOperationException("Invalid Cloud parameters");
 
@@ -230,7 +231,7 @@ namespace Ecommerce.Services.Implementations
             if (image != null)
                 throw new InvalidOperationException("Image does not exist");
 
-            var cloudinary = new CloudinaryDotNet.Cloudinary(new Account(_cloudinary.CloudName, _cloudinary.ApiKey, _cloudinary.ApiSecret));
+            var cloudinary = new CloudinaryDotNet.Cloudinary(new Account(_configuration["CloudinarySettings:CloudName"], _configuration["CloudinarySettings:ApiKey"], _configuration["CloudinarySettings:ApiSecret"]));
             var param = new DeletionParams(image.PublicId) { };
 
             await cloudinary.DestroyAsync(param);
