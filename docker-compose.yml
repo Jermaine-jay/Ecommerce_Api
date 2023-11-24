@@ -1,6 +1,7 @@
 version: '3.4'
 
 services:
+
   redis:
     image: redis:latest
     ports:
@@ -18,16 +19,14 @@ services:
 
     restart: always
 
+
   ecommerce_api:
     image: ${DOCKER_REGISTRY-}ecommerceapi
-    container_name: Ecommerce_App
-    depends_on:
-       - "app_db"
     build:
       context: .
       dockerfile: Ecommerce_Api/Dockerfile
-
+    depends_on:
+        - "app_db"
     environment: 
-      - ConnectionStrings:DefaultConnection="Server=app_db;Host=localhost;Database=EcommerceDb;Username=postgres;Password=#Alexissanchez31;Port=5432;"
-      - ASPNETCORE_URLS=http://+80;
-
+         - ConnectionStrings:DefaultConnection="Server=app_db;Database=EcommerceDb;Username=postgres;Password=#Alexissanchez31;Port=5432;"
+         - ASPNETCORE_URLS=http://+80;
