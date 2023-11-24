@@ -98,11 +98,10 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
 
 app.UseCors("CorsPolicy");
 app.UseRouting();
@@ -120,6 +119,6 @@ app.MapControllers();
 
 await app.SeedRole();
 await app.ClaimSeeder();
-//await app.ProductSeeder();
+await app.ProductSeeder();
 
 app.Run();
