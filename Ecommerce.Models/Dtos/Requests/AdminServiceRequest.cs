@@ -8,7 +8,7 @@ namespace Ecommerce.Models.Dtos.Requests
 {
     public class CreateCategoryRequest
     {
-        public string Name { get; set; }
+        public string? Name { get; set; }
     }
 
     public class LockUserRequest

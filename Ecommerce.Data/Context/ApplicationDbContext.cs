@@ -49,27 +49,12 @@ namespace Ecommerce.Data.Context
                 .HasForeignKey(ci => ci.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-/*
-            modelBuilder.Entity<ApplicationUser>()
-                .HasOne(ci => ci.Cart)
-                .WithOne(p => p.User)
-                .HasForeignKey<Cart>(ci => ci.UserId)
-                .OnDelete(DeleteBehavior.Cascade);*/
-
 
             modelBuilder.Entity<ApplicationUser>()
                 .HasMany(ci => ci.Orders)
                 .WithOne(p => p.ApplicationUser)
                 .HasForeignKey(ci => ci.ApplicationUserId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            /*https://localhost:44317/sigin-google*/
-
-            /*modelBuilder.Entity<Cart>()
-                .HasMany(ci => ci.CartItems)
-                .WithOne(c => c.Cart)
-                .HasForeignKey(ci => ci.CartId)
-                .OnDelete(DeleteBehavior.Cascade);*/
 
 
             modelBuilder.Entity<Category>()
@@ -106,8 +91,6 @@ namespace Ecommerce.Data.Context
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Category> Categories { get; set; }
-        //public DbSet<Cart> Carts { get; set; }
-        //public DbSet<CartItem> CartItems { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
         public DbSet<ProductVariation> ProductVariations { get; set; }
         public DbSet<ShippingAddress> ShippingAddresses { get; set; }

@@ -5,7 +5,7 @@ namespace Ecommerce.Models.Entities
     public class ProductImage
     {
         [Key]
-        public string PublicId { get; set; } 
+        public string? PublicId { get; set; } 
         public string? Format { get; set; } 
         public DateTime? CreatedAt { get; set; }
         public long? Bytes { get; set; }
