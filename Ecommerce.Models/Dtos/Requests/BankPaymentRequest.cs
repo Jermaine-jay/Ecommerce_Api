@@ -11,8 +11,8 @@ namespace Ecommerce.Models.Dtos.Requests
         public string AccountNumber { get; set; }
 
         [JsonProperty("birthday")]
-        public string Birthday { get; set; }
-        public string OrderId { get; set; }
+        public string? Birthday { get; set; }
+        public string? OrderId { get; set; }
     }
 
     public class FlutterPaymentRequest

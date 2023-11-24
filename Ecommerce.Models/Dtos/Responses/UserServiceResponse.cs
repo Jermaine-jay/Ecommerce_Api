@@ -26,7 +26,7 @@ namespace Ecommerce.Models.Dtos.Responses
     {
         public bool? Success { get; set; }
         public HttpStatusCode? StatusCode { get; set; }
-        public CartItem Data { get; set; }
+        public CartItem? Data { get; set; }
     }
 
     public class ProfileResponse

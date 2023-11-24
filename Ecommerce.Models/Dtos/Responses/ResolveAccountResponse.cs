@@ -13,12 +13,12 @@ namespace Ecommerce.Models.Dtos.Responses
         public bool Status { get; set; }
 
         [JsonProperty("message")]
-        public string Message { get; set; }
+        public string? Message { get; set; }
 
         [JsonProperty("account_number")]
-        public string AccountNumber { get; set; }
+        public string? AccountNumber { get; set; }
 
         [JsonProperty("account_name")]
-        public string AccountName { get; set; }
+        public string? AccountName { get; set; }
     }
 }

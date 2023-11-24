@@ -13,10 +13,10 @@ namespace Ecommerce.Models.Dtos.Responses
         public bool Status { get; set; }
 
         [JsonProperty("message")]
-        public string Message { get; set; }
+        public string? Message { get; set; }
 
         [JsonProperty("reference")]
-        public string Reference { get; set; }
+        public string? Reference { get; set; }
 
         [JsonProperty("authorization_url")]
         public string? AuthorizationUrl { get; set; }
@@ -25,13 +25,13 @@ namespace Ecommerce.Models.Dtos.Responses
     public class FlutterTransactionResponse
     {
         [JsonProperty("status")]
-        public string Status { get; set; }
+        public string? Status { get; set; }
 
         [JsonProperty("message")]
-        public string Message { get; set; }
+        public string? Message { get; set; }
 
         [JsonProperty("reference")]
-        public string Reference { get; set; }
+        public string? Reference { get; set; }
 
         [JsonProperty("authorization_url")]
         public string? AuthorizationUrl { get; set; }

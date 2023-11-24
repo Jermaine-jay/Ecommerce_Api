@@ -5,10 +5,10 @@ namespace Ecommerce.Models.Dtos.Requests
     public class UserRegistrationRequest
     {
         [Required]
-        public string Firstname { get; set; }
+        public string? Firstname { get; set; }
 
         [Required]
-        public string LastName { get; set; }
+        public string? LastName { get; set; }
 
         [Required, DataType(DataType.Password)]
         public string? Password { get; set; }

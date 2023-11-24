@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Ecommerce.Models.Dtos.Requests
+﻿namespace Ecommerce.Models.Dtos.Requests
 {
     public class CreateCategoryRequest
     {
@@ -13,7 +7,7 @@ namespace Ecommerce.Models.Dtos.Requests
 
     public class LockUserRequest
     {
-        public string UserId { get; set; }
+        public string? UserId { get; set; }
         public int Duration { get; set; }
     }
 

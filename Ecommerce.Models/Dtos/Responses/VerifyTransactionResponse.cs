@@ -16,10 +16,10 @@ namespace Ecommerce.Models.Dtos.Responses
         public int Amount { get; set; }
 
         [JsonProperty("message")]
-        public string Message { get; set; }
+        public string? Message { get; set; }
 
         [JsonProperty("reference")]
-        public string Reference { get; set; }
-        public string DataStatus { get; set; }
+        public string? Reference { get; set; }
+        public string? DataStatus { get; set; }
     }
 }
