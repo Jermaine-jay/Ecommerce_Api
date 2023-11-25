@@ -134,7 +134,7 @@ namespace Ecommerce_Api.Extensions
             configurationOptions.Ssl = true;
             configurationOptions.Password = redisConfig["RedisConfig:Password"];
             configurationOptions.AbortOnConnectFail = false;
-            configurationOptions.EndPoints.Add(redisConfig["RedisConfig:Password"], int.Parse(redisConfig["RedisConfig:Port"]));
+            configurationOptions.EndPoints.Add(redisConfig["RedisConfig:Password"], 12808);
             configurationOptions.User = redisConfig["RedisConfig:user"];
 
             services.AddStackExchangeRedisCache(options =>
@@ -148,7 +148,7 @@ namespace Ecommerce_Api.Extensions
                 var connectionMultiplexer = ConnectionMultiplexer.Connect(new ConfigurationOptions
                 {
                     Password = redisConfig["RedisConfig:Password"],
-                    EndPoints = { { redisConfig["RedisConfig:Host"], int.Parse(redisConfig["RedisConfig:Port"]) } },
+                    EndPoints = { { redisConfig["RedisConfig:Host"], 12808 } },
                     AbortOnConnectFail = false,
                     AllowAdmin = false,
                     User = redisConfig["RedisConfig:User"],
