@@ -62,7 +62,7 @@ namespace Ecommerce_Api.Controllers
         }
 
 
-        [AllowAnonymous]
+        
         [HttpPost("addvariation", Name = "addvariation")]
         [SwaggerOperation(Summary = "add product varieties")]
         [SwaggerResponse(StatusCodes.Status201Created, Description = "true", Type = typeof(SuccessResponse))]

@@ -59,51 +59,84 @@ namespace Ecommerce.Data.Seeds
                 {
                     RoleId = role.Id,
                     ClaimType = "update-account",
-                },/*new ApplicationRoleClaim()
-                {
-                    RoleId = role.Id,
-                    ClaimType = "user-tasks",
                 },new ApplicationRoleClaim()
                 {
                     RoleId = role.Id,
-                    ClaimType = "user-projects",
+                    ClaimType = "get-cart",
                 },new ApplicationRoleClaim()
                 {
                     RoleId = role.Id,
-                    ClaimType = "project-task",
+                    ClaimType = "add-to-cart",
                 },new ApplicationRoleClaim()
                 {
                     RoleId = role.Id,
-                    ClaimType = "add-user-tasks",
+                    ClaimType = "delete-from-cart",
                 },new ApplicationRoleClaim()
                 {
                     RoleId = role.Id,
-                    ClaimType = "add-notifications",
+                    ClaimType = "delete-cartitems",
                 },new ApplicationRoleClaim()
                 {
                     RoleId = role.Id,
-                    ClaimType = "create-task",
+                    ClaimType = "flutterwavepayment",
                 },new ApplicationRoleClaim()
                 {
                     RoleId = role.Id,
-                    ClaimType = "delete-task",
+                    ClaimType = "verifyflutterwavepayment",
                 },new ApplicationRoleClaim()
                 {
                     RoleId = role.Id,
-                    ClaimType = "update-task",
+                    ClaimType = "clearcart",
                 },new ApplicationRoleClaim()
                 {
                     RoleId = role.Id,
-                    ClaimType = "update-priority",
+                    ClaimType = "createorder",
                 },new ApplicationRoleClaim()
                 {
                     RoleId = role.Id,
-                    ClaimType = "update-status",
-                },*/
+                    ClaimType = "shippingaddress",
+                },new ApplicationRoleClaim()
+                {
+                    RoleId = role.Id,
+                    ClaimType = "available-system",
+                },new ApplicationRoleClaim()
+                {
+                    RoleId = role.Id,
+                    ClaimType = "paystackpayment",
+                },new ApplicationRoleClaim()
+                {
+                    RoleId = role.Id,
+                    ClaimType = "verifypaystackpayment",
+                },
+                new ApplicationRoleClaim()
+                {
+                    RoleId = role.Id,
+                    ClaimType = "verifybankcharge",
+                },
+                new ApplicationRoleClaim()
+                {
+                    RoleId = role.Id,
+                    ClaimType = "get-account",
+                },new ApplicationRoleClaim()
+                {
+                    RoleId = role.Id,
+                    ClaimType = "available-banks",
+                },new ApplicationRoleClaim()
+                {
+                    RoleId = role.Id,
+                    ClaimType = "directcardpayment",
+                },new ApplicationRoleClaim()
+                {
+                    RoleId = role.Id,
+                    ClaimType = "directcardpayment",
+                },new ApplicationRoleClaim()
+                {
+                    RoleId = role.Id,
+                    ClaimType = "paystack-bank-charge",
+                },
 
             };
         }
-
 
 
         private static async Task<ICollection<ApplicationRoleClaim>> AdminClaim(ApplicationRole role)
@@ -121,7 +154,7 @@ namespace Ecommerce.Data.Seeds
                 },new ApplicationRoleClaim()
                 {
                     RoleId = role.Id,
-                    ClaimType = "get-a-user",
+                    ClaimType = "get-user",
                 },new ApplicationRoleClaim()
                 {
                     RoleId = role.Id,
@@ -170,6 +203,22 @@ namespace Ecommerce.Data.Seeds
                 {
                     RoleId = role.Id,
                     ClaimType = "edit-claim",
+                },new ApplicationRoleClaim()
+                {
+                    RoleId = role.Id,
+                    ClaimType = "get-all-routes",
+                },new ApplicationRoleClaim()
+                {
+                    RoleId = role.Id,
+                    ClaimType = "create-category",
+                },new ApplicationRoleClaim()
+                {
+                    RoleId = role.Id,
+                    ClaimType = "available-system",
+                },new ApplicationRoleClaim()
+                {
+                    RoleId = role.Id,
+                    ClaimType = "available-banks",
                 },new ApplicationRoleClaim()
                 {
                     RoleId = role.Id,

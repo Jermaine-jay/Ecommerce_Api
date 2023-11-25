@@ -3,12 +3,15 @@ using Ecommerce.Models.Dtos.Responses;
 using Ecommerce.Models.Entities;
 using Ecommerce.Services.Interfaces;
 using Ecommerce_Api.Extensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Ecommerce_Api.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize(Policy = "Authorization")]
+
     [ApiController]
     public class UserController : ControllerBase
     {

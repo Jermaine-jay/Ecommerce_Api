@@ -90,7 +90,7 @@ namespace Ecommerce_Api.Extensions
 
         public static void ConfigureJWT(this IServiceCollection services, IConfiguration jwtConfig)
         {
-            var secretKey = jwtConfig["Secret"];
+            var secretKey = jwtConfig["JwtConfig:Secret"];
 
             services.AddAuthentication(opt =>
             {

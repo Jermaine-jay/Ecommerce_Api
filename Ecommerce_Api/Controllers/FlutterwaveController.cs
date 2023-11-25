@@ -9,6 +9,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Ecommerce_Api.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize(Policy = "Authorization")]
     [ApiController]
     public class FlutterwaveController : ControllerBase
     {
@@ -23,7 +24,6 @@ namespace Ecommerce_Api.Controllers
         }
 
 
-        [AllowAnonymous]
         [HttpPost("flutterwavepayment", Name = "flutterwavepayment")]
         [SwaggerOperation(Summary = "flutterwave payment system")]
         [SwaggerResponse(StatusCodes.Status200OK, Description = "Transaction Details", Type = typeof(FlutterTransactionResponse))]
@@ -41,7 +41,7 @@ namespace Ecommerce_Api.Controllers
         }
 
 
-        [AllowAnonymous]
+    
         [HttpGet("verifyflutterwavepayment", Name = "verifyflutterwavepayment")]
         [SwaggerOperation(Summary = "verify flutterwave payment system")]
         [SwaggerResponse(StatusCodes.Status200OK, Description = "Transaction Details", Type = typeof(FlutterTransactionResponse))]
