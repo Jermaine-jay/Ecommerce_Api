@@ -1,0 +1,11 @@
+name:  render deploy app
+
+on: 
+  workflow_dispatch:
+
+jobs:
+  deploy-app:
+    runs-on: ubuntu_latest
+
+    steps: 
+      - run: curl ${{secrets.RENDER_DEPLOY_HOOK}}
