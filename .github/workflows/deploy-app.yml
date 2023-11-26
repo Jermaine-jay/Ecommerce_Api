@@ -1,7 +1,9 @@
 name:  render deploy app
 
-on: 
-  workflow_dispatch:
+on:
+  push:
+    branches:
+      - "*"
 
 jobs:
   deploy-app:
