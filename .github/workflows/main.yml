@@ -3,7 +3,7 @@ name:  render deploy app
 on:
   push:
     branches:
-      - master
+      - testbranch
 
 jobs:
   build:
