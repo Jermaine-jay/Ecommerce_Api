@@ -3,10 +3,10 @@ name:  render deploy app
 on:
   push:
     branches:
-      - "*"
+      - master
 
 jobs:
-  deploy-app:
+  build:
     runs-on: ubuntu_latest
 
     steps: 
