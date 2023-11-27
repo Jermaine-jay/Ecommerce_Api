@@ -1,0 +1,13 @@
+name:  render deploy app
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu_latest
+
+    steps: 
+      - run: curl ${{secrets.RENDER_DEPLOY_HOOK}}
