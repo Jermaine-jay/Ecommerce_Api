@@ -4,8 +4,10 @@ using Ecommerce.Models.Dtos.Responses;
 using Ecommerce.Models.Entities;
 using Ecommerce.Models.Enums;
 using Ecommerce.Services.Configurations.Cache.CacheServices;
+using Ecommerce.Services.Configurations.Cache.Otp;
 using Ecommerce.Services.Configurations.Cache.Security;
 using Ecommerce.Services.Interfaces;
+using Ecommerce.Services.Utilities;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -23,10 +25,14 @@ namespace Ecommerce.Services.Implementations
         private readonly HttpClient _httpClient;
         private readonly ICacheService _cacheService;
         private readonly ILoginAttempt _loginAttempt;
+        private readonly IOtpService _otpService;
+        private readonly IEmailService _emailService;
 
 
-        public AuthServices(UserManager<ApplicationUser> userManager, IConfiguration configuration, RoleManager<ApplicationRole> roleManager,
-            IJwtAuthenticator jwtAuthenticator, HttpClient httpClient, ICacheService cacheService, ILoginAttempt loginAttempt)
+
+        public AuthServices(UserManager<ApplicationUser> userManager, IConfiguration configuration, 
+            RoleManager<ApplicationRole> roleManager, IJwtAuthenticator jwtAuthenticator, HttpClient httpClient, 
+            ICacheService cacheService, ILoginAttempt loginAttempt, IOtpService otpService, IEmailService emailService)
         {
             _userManager = userManager;
             _configuration = configuration;
@@ -35,6 +41,8 @@ namespace Ecommerce.Services.Implementations
             _httpClient = httpClient;
             _cacheService = cacheService;
             _loginAttempt = loginAttempt;
+            _otpService = otpService;
+            _emailService = emailService;
         }
 
 
@@ -43,7 +51,6 @@ namespace Ecommerce.Services.Implementations
             var input = "AUTHORIZATION WORKS";
             return input;
         }
-
 
         public async Task<AuthenticationResponse> GoogleAuth(string credential)
         {
@@ -332,6 +339,61 @@ namespace Ecommerce.Services.Implementations
             return new SuccessResponse
             {
                 Success = true,
+            };
+        }
+
+        public async Task<ResetPasswordResponse> ForgotPassword(ForgotPasswordRequest request)
+        {
+            ApplicationUser? existingUser = await _userManager.FindByEmailAsync(request.Email);
+            if (existingUser != null)
+                throw new InvalidOperationException($"Invalid Email Address");
+
+
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            var isConfrimed = await _userManager.IsEmailConfirmedAsync(user);
+            if (user == null || !isConfrimed)
+                throw new InvalidOperationException($"User does not exist");
+
+            if (user.LockoutEnd != null)
+                throw new InvalidOperationException($"User Suspended. Time Left {user.LockoutEnd - DateTimeOffset.UtcNow}");
+
+
+            var result = await _emailService.ResetPasswordMail(user);
+            return new ResetPasswordResponse
+            {
+                Message = "Token sent",
+                Token = result,
+                Success = true
+            };
+        }
+
+        public async Task<SuccessResponse> ResetPassword(ResetPasswordRequest request)
+        {
+            var (existingUser, operation) = await DecodeToken.DecodeVerificationToken(request.Token);
+
+            ApplicationUser user = await _userManager.FindByIdAsync(existingUser);
+            if (user == null || !user.EmailConfirmed)
+                throw new InvalidOperationException($"User does not exist");
+
+
+            if (operation != OtpOperation.PasswordReset.ToString())
+                throw new InvalidOperationException($"Invalid Operation");
+
+
+            bool isOtpValid = await _otpService.VerifyOtpAsync(user.Id.ToString(), request.Token, OtpOperation.PasswordReset);
+            if (!isOtpValid)
+                throw new InvalidOperationException($"Invalid Token");
+
+
+            IdentityResult result = await _userManager.ChangePasswordAsync(user, request.NewPassword, request.ConfirmPassword);
+            if (!result.Succeeded)
+                throw new InvalidOperationException($"Could not complete operation");
+
+
+            return new SuccessResponse
+            {
+                Success = true,
+                Data = result,
             };
         }
     }

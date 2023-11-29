@@ -1,6 +1,7 @@
 ﻿using Ecommerce.Models.Dtos.Requests;
 using Ecommerce.Models.Dtos.Responses;
 using Ecommerce.Models.Entities;
+using Ecommerce.Services.Implementations;
 using Ecommerce.Services.Interfaces;
 using Ecommerce_Api.Extensions;
 using Microsoft.AspNetCore.Authorization;
@@ -105,6 +106,37 @@ namespace Ecommerce_Api.Controllers
             return Ok(response);
         }
 
+
+        [AllowAnonymous]
+        [HttpPost("forgot-password", Name = "forgot-password")]
+        [SwaggerOperation(Summary = "forgot-password")]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "returns a token", Type = typeof(ResetPasswordResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Invalid email", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "User does not exist", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            var response = await _authServices.ForgotPassword(request);
+            return Ok(response);
+        }
+
+
+        [AllowAnonymous]
+        [HttpPut("reset-password", Name = "reset-password")]
+        [SwaggerOperation(Summary = "reset-password")]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "returns a token", Type = typeof(SuccessResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "User does not exist", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Invalid Token", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Invalid operation", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
+        public async Task<IActionResult> ResetPassword([FromQuery] ResetPasswordRequest request)
+        {
+            var response = await _authServices.ResetPassword(request);
+            if (response.Success)
+                return RedirectToAction("LoginUser");
+
+            return BadRequest(response);
+        }
 
 
         [Authorize]

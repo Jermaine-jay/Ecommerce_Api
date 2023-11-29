@@ -35,6 +35,8 @@ namespace Ecommerce_Api.Extensions
             services.AddScoped<IRoleClaimService, RoleClaimService>();
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IGenerateEmailPage, GenerateEmailPage>();
             services.AddScoped<IAuthorizationHandler, AuthHandler>();
             services.AddScoped<IPaystackPaymentService, PaystackPaymentService>();
             services.AddScoped<ILoginAttempt, LoginAttempt>();
@@ -125,6 +127,7 @@ namespace Ecommerce_Api.Extensions
             });
 
         }
+
 
         public static void AddRedisCache(this IServiceCollection services, IConfiguration config)
         {
