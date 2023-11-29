@@ -39,6 +39,7 @@ namespace Ecommerce_Api.Extensions
             services.AddScoped<IPaystackPaymentService, PaystackPaymentService>();
             services.AddScoped<ILoginAttempt, LoginAttempt>();
             services.AddScoped<IFlutterwavePaymentService, FlutterwavePaymentService>();
+            services.AddTransient<ICacheService, CacheService>();
         }
 
 
@@ -125,39 +126,35 @@ namespace Ecommerce_Api.Extensions
 
         }
 
-        public static void AddRedisCache(this IServiceCollection services, IConfiguration redisConfig)
+        public static void AddRedisCache(this IServiceCollection services, IConfiguration config)
         {
-
             ConfigurationOptions configurationOptions = new ConfigurationOptions();
             configurationOptions.SslProtocols = SslProtocols.Tls12;
             configurationOptions.SyncTimeout = 30000;
             configurationOptions.Ssl = true;
-            configurationOptions.Password = redisConfig["RedisConfig:Password"];
+            configurationOptions.Password = config["RedisConfig:Password"];
             configurationOptions.AbortOnConnectFail = false;
-            configurationOptions.EndPoints.Add(redisConfig["RedisConfig:Password"], 12808);
-            configurationOptions.User = redisConfig["RedisConfig:user"];
+            configurationOptions.EndPoints.Add(config["RedisConfig:Host"], 16360);
+
 
             services.AddStackExchangeRedisCache(options =>
             {
                 options.Configuration = configurationOptions.ToString();
-                options.InstanceName = redisConfig["RedisConfig:InstanceId"];
+                options.InstanceName = config["RedisConfig:InstanceId"];
             });
 
             services.AddSingleton<IConnectionMultiplexer>((x) =>
             {
                 var connectionMultiplexer = ConnectionMultiplexer.Connect(new ConfigurationOptions
                 {
-                    Password = redisConfig["RedisConfig:Password"],
-                    EndPoints = { { redisConfig["RedisConfig:Host"], 12808 } },
+                    Password = configurationOptions.Password,
+                    EndPoints = { configurationOptions.EndPoints[0] },
                     AbortOnConnectFail = false,
                     AllowAdmin = false,
-                    User = redisConfig["RedisConfig:User"],
-                    Ssl = true,
-                    SslProtocols = System.Security.Authentication.SslProtocols.Tls12
+                    ClientName = config["RedisConfig:InstanceId"]
                 });
                 return connectionMultiplexer;
             });
-            services.AddTransient<ICacheService, CacheService>();
         }
     }
 }
