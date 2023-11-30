@@ -29,7 +29,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Ecommerce.Cache\Ecommerce.Cache.csproj" />
     <ProjectReference Include="..\Ecommerce.Data\Ecommerce.Data.csproj" />
     <ProjectReference Include="..\Ecommerce.Migrations\Ecommerce.Migrations.csproj" />
     <ProjectReference Include="..\Ecommerce.Models\Ecommerce.Models.csproj" />
