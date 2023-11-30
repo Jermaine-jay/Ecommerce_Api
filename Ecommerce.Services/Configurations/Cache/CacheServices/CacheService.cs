@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using StackExchange.Redis;
 
-namespace TaskManager.Services.Configurations.Cache.CacheServices
+namespace Ecommerce.Services.Configurations.Cache.CacheServices
 {
     public class CacheService : ICacheService
     {
@@ -39,12 +39,10 @@ namespace TaskManager.Services.Configurations.Cache.CacheServices
         }
 
 
-
         public async Task ClearFromCache(string key)
         {
             await _redis.KeyDeleteAsync(key);
         }
-
 
 
         public async Task ClearFromCache(CacheKeySets cacheKeySets, string key)

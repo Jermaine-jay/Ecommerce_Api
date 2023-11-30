@@ -1,13 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Ecommerce.Models.Enums;
 
 namespace Ecommerce.Models.Entities
 {
     public class CartItem : BaseEntity
     {
-        public Guid ProductId { get; set; }
-        public Guid CartId { get; set; }
+        public string? ProductId { get; set; }
+        public string? ProductName { get; set; }
+        public string? ProductImage { get; set; }
+        public Guid? CartId { get; set; }
         public int Quantity { get; set; }
-        public virtual Product Product { get; set; }
-        public virtual Cart Cart { get; set; }
+        public decimal UnitPrice { get; set; }
+        public Colour Colour { get; set; }
     }
 }

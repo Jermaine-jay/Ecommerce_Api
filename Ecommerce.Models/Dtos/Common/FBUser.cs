@@ -11,13 +11,13 @@ namespace Ecommerce.Models.Dtos.Common
     public partial class Data
     {
         [JsonProperty("app_id")]
-        public string AppId { get; set; }
+        public string? AppId { get; set; }
 
         [JsonProperty("type")]
-        public string Type { get; set; }
+        public string? Type { get; set; }
 
         [JsonProperty("application")]
-        public string Application { get; set; }
+        public string? Application { get; set; }
 
         [JsonProperty("data_access_expires_at")]
         public long DataAccessExpiresAt { get; set; }
@@ -32,22 +32,22 @@ namespace Ecommerce.Models.Dtos.Common
         public List<string> Scopes { get; set; }
 
         [JsonProperty("user_id")]
-        public string UserId { get; set; }
+        public string? UserId { get; set; }
     }
 
     public class FBUserInfo
     {
 
         [JsonProperty("first_name")]
-        public string FirstName { get; set; }
+        public string? FirstName { get; set; }
 
         [JsonProperty("last_name")]
-        public string LastName { get; set; }
+        public string? LastName { get; set; }
 
         [JsonProperty("email")]
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         [JsonProperty("id")]
-        public string Id { get; set; }
+        public string? Id { get; set; }
     }
 }

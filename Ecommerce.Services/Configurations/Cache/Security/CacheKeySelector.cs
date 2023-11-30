@@ -1,14 +1,25 @@
 ﻿using Ecommerce.Services.Utilities;
 using System.Text;
-using TaskManager.Services.Configurations.Cache.Otp;
+using Ecommerce.Services.Configurations.Cache.Otp;
 
-namespace TaskManager.Services.Configurations.Cache.Security
+namespace Ecommerce.Services.Configurations.Cache.Security
 {
     public class CacheKeySelector
     {
         public static string OtpCodeCacheKey(string userId, OtpOperation operation)
         {
             return SHA256Hasher.Hash($"{CacheKeyPrefix.OtpCode}_{userId}_{operation}");
+        }
+
+
+        public static string AccountLockoutCacheKey(string userId)
+        {
+            return SHA256Hasher.Hash($"{CacheKeyPrefix.LoginAttempt}_{userId}");
+        }
+
+        public static string UserCartCacheKey(string userId)
+        {
+            return SHA256Hasher.Hash($"{CacheKeyPrefix.UserCrt}_{userId}");
         }
 
 

@@ -1,13 +1,17 @@
-﻿namespace Ecommerce.Models.Entities
+﻿using Ecommerce.Models.Enums;
+using System.Text.Json.Serialization;
+
+namespace Ecommerce.Models.Entities
 {
     public class OrderItem : BaseEntity
     {
-        public Guid ProductId { get; set; }
+        public string? ProductName { get; set; }
+        public Colour Colour { get; set; }
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
-        public virtual Product Product { get; set; }
-
+        [JsonIgnore]
         public Guid? OrderId { get; set; }
+        [JsonIgnore]
         public virtual Order Order { get; set; }
     }
 }

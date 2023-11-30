@@ -1,0 +1,32 @@
+version: '3.4'
+
+services:
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+  app_db:
+    image: postgres:latest
+    container_name: app_db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=#Alexissanchez31
+      - POSTGRES_DB=EcommerceDb
+    ports:
+      - 5432:5433
+
+    restart: always
+
+
+  ecommerce_api:
+    image: ${DOCKER_REGISTRY-}ecommerceapi
+    build:
+      context: .
+      dockerfile: Ecommerce_Api/Dockerfile
+    depends_on:
+        - "app_db"
+    environment: 
+         - ConnectionStrings:DefaultConnection="Server=app_db;Database=EcommerceDb;Username=postgres;Password=#Alexissanchez31;Port=5432;"
+         - ASPNETCORE_URLS=http://+80;

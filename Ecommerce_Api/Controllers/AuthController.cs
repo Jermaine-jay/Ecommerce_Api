@@ -1,7 +1,6 @@
 ﻿using Ecommerce.Models.Dtos.Requests;
 using Ecommerce.Models.Dtos.Responses;
 using Ecommerce.Models.Entities;
-using Ecommerce.Services.Implementations;
 using Ecommerce.Services.Interfaces;
 using Ecommerce_Api.Extensions;
 using Microsoft.AspNetCore.Authorization;
@@ -32,9 +31,10 @@ namespace Ecommerce_Api.Controllers
         [AllowAnonymous]
         [HttpPost("register", Name = "register")]
         [SwaggerOperation(Summary = "register user")]
-        [SwaggerResponse(StatusCodes.Status200OK)]
-        [SwaggerResponse(StatusCodes.Status400BadRequest)]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "user", Type = typeof(ApplicationUserDto))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "user already exist with email", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "failed to create user", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = typeof(ErrorResponse))]
         public async Task<IActionResult> RegisterUser([FromBody] UserRegistrationRequest request)
         {
             var response = await _authServices.RegisterUser(request);
@@ -45,10 +45,10 @@ namespace Ecommerce_Api.Controllers
         [AllowAnonymous]
         [HttpPost("LoginWithFacebook", Name = "LoginWithFacebook")]
         [SwaggerOperation(Summary = "Authenticates a user with facebook")]
-        [SwaggerResponse(StatusCodes.Status200OK, Type = typeof(AuthenticationResponse))]
-        [SwaggerResponse(StatusCodes.Status400BadRequest, Type = typeof(ErrorResponse))]
-        [SwaggerResponse(StatusCodes.Status400BadRequest, Type = typeof(AuthenticationResponse))]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "user token", Type = typeof(AuthenticationResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "unauthorized user", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Invalid external authentication", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "Internal error", Type = typeof(ErrorResponse))]
         public async Task<IActionResult> FacebookAuth([FromBody] string accessToken)
         {
             var result = await _authServices.FaceBookAuth(accessToken);
@@ -59,32 +59,32 @@ namespace Ecommerce_Api.Controllers
         }
 
 
+
         [AllowAnonymous]
         [HttpPost("LoginWithGoogle")]
         [SwaggerOperation(Summary = "Authenticates a user with google")]
-        [SwaggerResponse(StatusCodes.Status200OK)]
-        [SwaggerResponse(StatusCodes.Status400BadRequest)]
-        [SwaggerResponse(StatusCodes.Status400BadRequest)]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "user token", Type = typeof(AuthenticationResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "No info", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Invalid external authentication", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "Internal error", Type = typeof(ErrorResponse))]
         public async Task<IActionResult> GoogleAuth([FromBody] string accessToken)
         {
             var response = await _authServices.GoogleAuth(accessToken);
-            if(!response.IsExisting)
+            if (!response.IsExisting)
                 return RedirectToAction(nameof(ChangePassword));
-            
+
             return Ok(response);
         }
 
 
 
-        [AllowAnonymous]
         [HttpPost("change-password")]
         [SwaggerOperation(Summary = "Change user password")]
-        [SwaggerResponse(StatusCodes.Status200OK)]
-        [SwaggerResponse(StatusCodes.Status400BadRequest)]
-        [SwaggerResponse(StatusCodes.Status400BadRequest)]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> ChangePassword([FromBody]ChangePasswordRequest request)
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "user token", Type = typeof(SuccessResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "unauthorized user", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Invalid external authentication", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "Internal error", Type = typeof(ErrorResponse))]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
             string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
             var response = await _authServices.ChangePassword(userId, request);
@@ -106,16 +106,35 @@ namespace Ecommerce_Api.Controllers
         }
 
 
-        [Authorize]
-        [HttpPost("test", Name = "test")]
-        [SwaggerOperation(Summary = "register user")]
-        [SwaggerResponse(StatusCodes.Status200OK)]
-        [SwaggerResponse(StatusCodes.Status400BadRequest)]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Test()
+        [AllowAnonymous]
+        [HttpPost("forgot-password", Name = "forgot-password")]
+        [SwaggerOperation(Summary = "forgot-password")]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "returns a token", Type = typeof(ResetPasswordResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Invalid email", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "User does not exist", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {
-            var response = await _authServices.ChangeSocialDetails();
+            var response = await _authServices.ForgotPassword(request);
             return Ok(response);
+        }
+
+
+        [AllowAnonymous]
+        [HttpPut("reset-password", Name = "reset-password")]
+        [SwaggerOperation(Summary = "reset-password")]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "returns a token", Type = typeof(SuccessResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "User does not exist", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Invalid Token", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Invalid operation", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
+        public async Task<IActionResult> ResetPassword([FromQuery] ResetPasswordRequest request)
+        {
+            var response = await _authServices.ResetPassword(request);
+            if (response.Success)
+                return RedirectToAction("LoginUser");
+
+            return BadRequest(response);
         }
     }
 }
