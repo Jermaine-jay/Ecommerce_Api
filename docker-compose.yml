@@ -12,9 +12,9 @@ services:
     image: postgres:latest
     container_name: app_db
     environment:
-      - POSTGRES_USER=posgres
-      - POSTGRES_PASSWORD=#Alexissanchez31
-      - POSTGRES_DB=EcomerceDb
+      - POSTGRES_USER=posgres_database_708a_user
+      - POSTGRES_PASSWORD=xgjpQtW5m5jbITR9NPDwFmqXQXgk7G7T
+      - POSTGRES_DB=posgres_database_708a
     ports:
       - 5432:5433
 
@@ -30,7 +30,7 @@ services:
     depends_on:
         - "app_db"
     environment: 
-         - ConnectionStrings:DefaultConnection="Host=app_db;Database=EcommerceDb;Username=postgres;Password=#Alexissanchez31;Port=5432;"
+         - ConnectionStrings:DefaultConnection="Host=dpg-clga11njc5ks73edbiag-a.oregon-postgres.render.com;Database=posgres_database_708a;Username=posgres_database_708a_user;Password=xgjpQtW5m5jbITR9NPDwFmqXQXgk7G7T;Port=5432;"
          - ASPNETCORE_URLS=http://+80;
 
 
