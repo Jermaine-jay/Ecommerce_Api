@@ -1,7 +1,6 @@
 ﻿using Ecommerce.Models.Dtos.Requests;
 using Ecommerce.Models.Dtos.Responses;
 using Ecommerce.Models.Entities;
-using Ecommerce.Services.Implementations;
 using Ecommerce.Services.Interfaces;
 using Ecommerce_Api.Extensions;
 using Microsoft.AspNetCore.Authorization;
@@ -136,19 +135,6 @@ namespace Ecommerce_Api.Controllers
                 return RedirectToAction("LoginUser");
 
             return BadRequest(response);
-        }
-
-
-        [Authorize]
-        [HttpPost("test", Name = "test")]
-        [SwaggerOperation(Summary = "register user")]
-        [SwaggerResponse(StatusCodes.Status200OK)]
-        [SwaggerResponse(StatusCodes.Status400BadRequest)]
-        [SwaggerResponse(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Test()
-        {
-            var response = await _authServices.ChangeSocialDetails();
-            return Ok(response);
         }
     }
 }

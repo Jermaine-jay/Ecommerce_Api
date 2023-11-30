@@ -3,6 +3,7 @@ using Ecommerce.Data.Implementations;
 using Ecommerce.Data.Interfaces;
 using Ecommerce.Models.Entities;
 using Ecommerce.Services.Configurations.Cache.CacheServices;
+using Ecommerce.Services.Configurations.Cache.Otp;
 using Ecommerce.Services.Configurations.Cache.Security;
 using Ecommerce.Services.Configurations.Jwt;
 using Ecommerce.Services.Implementations;
@@ -37,6 +38,7 @@ namespace Ecommerce_Api.Extensions
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IGenerateEmailPage, GenerateEmailPage>();
+            services.AddScoped<IOtpService, OtpService>();
             services.AddScoped<IAuthorizationHandler, AuthHandler>();
             services.AddScoped<IPaystackPaymentService, PaystackPaymentService>();
             services.AddScoped<ILoginAttempt, LoginAttempt>();
