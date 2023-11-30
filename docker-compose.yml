@@ -8,29 +8,31 @@ services:
     ports:
       - "6379:6379"
 
-  app_database:
+  app_db:
     image: postgres:latest
     container_name: app_db
     environment:
-      - POSTGRES_USER=posgres_database_708a_user
-      - POSTGRES_PASSWORD=xgjpQtW5m5jbITR9NPDwFmqXQXgk7G7T
-      - POSTGRES_DB=posgres_database_708a
+      - POSTGRES_USER=posgres
+      - POSTGRES_PASSWORD=#Alexissanchez31
+      - POSTGRES_DB=EcomerceDb
     ports:
       - 5432:5433
 
     restart: always
 
 
-  taskmanager.api:
-    image: ${DOCKER_REGISTRY-}taskmanagerapi
+  ecommerce_api:
+    image: ${DOCKER_REGISTRY-}ecommerceapi
     build:
       context: .
-      dockerfile: TaskManagerApi/Dockerfile
+      dockerfile: Ecommerce_Api/Dockerfile
  
     depends_on:
-        - "app_database"
+        - "app_db"
     environment: 
          - ConnectionStrings:DefaultConnection="Host=app_db;Database=EcommerceDb;Username=postgres;Password=#Alexissanchez31;Port=5432;"
          - ASPNETCORE_URLS=http://+80;
+
+
 
 
