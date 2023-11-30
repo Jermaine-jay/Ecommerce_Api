@@ -1,5 +1,6 @@
 version: '3.4'
 
+
 services:
 
   redis:
@@ -7,26 +8,29 @@ services:
     ports:
       - "6379:6379"
 
-  app_db:
+  app_database:
     image: postgres:latest
     container_name: app_db
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=#Alexissanchez31
-      - POSTGRES_DB=EcommerceDb
+      - POSTGRES_USER=posgres_database_708a_user
+      - POSTGRES_PASSWORD=xgjpQtW5m5jbITR9NPDwFmqXQXgk7G7T
+      - POSTGRES_DB=posgres_database_708a
     ports:
       - 5432:5433
 
     restart: always
 
 
-  ecommerce_api:
-    image: ${DOCKER_REGISTRY-}ecommerceapi
+  taskmanager.api:
+    image: ${DOCKER_REGISTRY-}taskmanagerapi
     build:
       context: .
-      dockerfile: Ecommerce_Api/Dockerfile
+      dockerfile: TaskManagerApi/Dockerfile
+ 
     depends_on:
-        - "app_db"
+        - "app_database"
     environment: 
-         - ConnectionStrings:DefaultConnection="Server=app_db;Database=EcommerceDb;Username=postgres;Password=#Alexissanchez31;Port=5432;"
+         - ConnectionStrings:DefaultConnection="Host=app_db;Database=EcommerceDb;Username=postgres;Password=#Alexissanchez31;Port=5432;"
          - ASPNETCORE_URLS=http://+80;
+
+
