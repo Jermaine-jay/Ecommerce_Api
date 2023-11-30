@@ -102,6 +102,7 @@ app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 
 app.MapControllers();
 
+
 //await app.SeedRole();
 //await app.ClaimSeeder();
 //await app.ProductSeeder();
