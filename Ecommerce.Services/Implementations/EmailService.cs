@@ -5,7 +5,6 @@ using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
-using Newtonsoft.Json;
 
 namespace Ecommerce.Services.Implementations
 {
@@ -16,8 +15,8 @@ namespace Ecommerce.Services.Implementations
         private readonly IOtpService _otpService;
         private readonly IGenerateEmailPage _generateEmailPage;
 
-        public EmailService(IConfiguration configuration,IHttpContextAccessor httpContextAccessor,
-             IOtpService otpService,IGenerateEmailPage generateEmailPage)
+        public EmailService(IConfiguration configuration, IHttpContextAccessor httpContextAccessor,
+             IOtpService otpService, IGenerateEmailPage generateEmailPage)
         {
             _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
@@ -39,7 +38,6 @@ namespace Ecommerce.Services.Implementations
 
             using (var client = new SmtpClient())
             {
-
                 client.Connect(_configuration["EmailSenderOptions:SmtpServer"], int.Parse(_configuration["EmailSenderOptions:Port"]), true);
                 client.Authenticate(_configuration["EmailSenderOptions:Email"], _configuration["EmailSenderOptions:Password"]);
                 client.Send(message);
@@ -53,8 +51,9 @@ namespace Ecommerce.Services.Implementations
         public async Task<string> ResetPasswordMail(ApplicationUser user)
         {
             var validToken = await _otpService.GenerateUniqueOtpAsync(user.Id.ToString(), OtpOperation.PasswordReset);
+            string appUrl = $"{_configuration["AppUrl:Url"]}api/Auth/reset-password?Token={validToken}";
 
-            var page = _generateEmailPage.PasswordResetPage(validToken);
+            var page = _generateEmailPage.PasswordResetPage(appUrl);
             await SendEmailAsync(user.Email, "Reset Password", page);
             return validToken;
         }
