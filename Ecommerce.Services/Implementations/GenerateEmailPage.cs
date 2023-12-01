@@ -67,9 +67,11 @@ namespace Ecommerce.Services.Implementations
              <h1>Reset Password</h1>
                 <p>We need a little more information to complete your account recovery.</p>
                 <p>Click below to reset your password.</p>
+                
                 <div>
-                    <p>'{callbackurl}</p>
+                    <a href='{callbackurl}'>Change Password</a>
                 </div>
+                
             </div>
         </body>
         </html>
