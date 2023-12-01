@@ -46,7 +46,6 @@ namespace Ecommerce_Api.Extensions
             services.AddTransient<ICacheService, CacheService>();
         }
 
-
         public static void RegisterDbContext(this IServiceCollection services, string? connectionString)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
@@ -59,7 +58,6 @@ namespace Ecommerce_Api.Extensions
                 });
             });
         }
-
 
         public static void ConfigureIdentity(this IServiceCollection services)
         {
@@ -129,7 +127,6 @@ namespace Ecommerce_Api.Extensions
             });
 
         }
-
 
         public static void AddRedisCache(this IServiceCollection services, IConfiguration config)
         {
