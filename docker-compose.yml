@@ -30,7 +30,7 @@ services:
     depends_on:
         - "app_db"
     environment: 
-         - ConnectionStrings:DefaultConnection="Host=dpg-clksb9maov6s738n3g80-a;Database=applicationdb_0u5v;Username=jermaine;Password=b0OfJlHRIVX2ccznWC7C2jOwbR4sx8QL;Port=5432;"
+         - ConnectionStrings:DefaultConnection="Host=dpg-clksb9maov6s738n3g80-a.oregon-postgres.render.com;Database=applicationdb_0u5v;Username=jermaine;Password=b0OfJlHRIVX2ccznWC7C2jOwbR4sx8QL;Port=5432;"
          - ASPNETCORE_URLS=http://+80;
 
 
