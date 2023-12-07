@@ -1,6 +1,6 @@
-# Task Manager Api Application
+# Ecommerce Api Application
 ____
-#### This Application is a web application built with ASP.NET API, Entity Framework Core, Redis, PostgreSQL, Google auth API, Facebook auth API and Docker. This application makes online shooping easier and faster, with no payment issue.
+#### This Application is a web application built with ASP.NET API, Entity Framework Core, Redis, PostgreSQL, Google auth API, Facebook auth API, and Docker. This application makes online shopping easier and faster, with no payment issues.
 
 
 ## Technologies
@@ -26,21 +26,21 @@ ____
 * User Authentication and Authorization: Secure user registration and login system, ensuring only authorized users can have access to app features,
   Ensure only admins can make changes to the system. Note, that you can not login without email confirmation.
 
-* User Update: Only confirmed users will be able to log in, update details.
+* User Update: Only confirmed users will be able to log in, and update details.
 
-* Payment Feature: The app has multiple payment platforms embeded to fascilitate payment.
+* Payment Feature: The app has multiple payment platforms embedded to facilitate payment.
 
 * Orders: Users can create as well as pay for orders with a safe and secured payment method.
 
 * User Profiles: Only authenticated users can use the application's features.
 
-* Admin: Admins can check or delete orders, can check and delete users, add roles or change user role, add role claims to a role. Admins can add new products and also edit products.
+* Admin: Admins can check or delete orders, check and delete users, add roles or change user roles, and add role claims to a role. Admins can add new products and also edit products.
 
 ## How it works
 _____
 * Registration: The app uses an email system to confirm a user's email when they register, and an email system that sends a link to their mail for password reset. The application also has well-secured authentication and authorization mechanisms.
 
-* External Login: Intending users can sign with their google or facebook accounts and aslo login with their google and facebook accounts.
+* External Login: Intending users can sign in with their Google or Facebook accounts and also login with their Google and Facebook accounts.
   
 * Email system: The email system uses a token-based approach to confirm a user's email address. When a user registers, a token is generated and sent to their email address. The user must then click on the link in the email to confirm their email address. This helps to prevent unauthorized users from creating accounts.
   
