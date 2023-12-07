@@ -77,7 +77,7 @@ namespace Ecommerce_Api.Attribute
             }
 
             context.Succeed(requirement);
-        
+
         }
     }
 }

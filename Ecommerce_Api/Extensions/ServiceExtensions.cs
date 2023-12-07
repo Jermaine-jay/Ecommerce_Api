@@ -82,13 +82,13 @@ namespace Ecommerce_Api.Extensions
                 .AddCookie(options =>
                 {
                     options.LoginPath = "/Auth/LoginUser";
-                })
+                });
 
-                .AddGoogle(options =>
+                /*.AddGoogle(options =>
                 {
                     options.ClientId = configuration["Authentication:Google:ClientId"];
                     options.ClientSecret = configuration["Authentication:Google:ClientSecret"];
-                });
+                });*/
         }
 
         public static void ConfigureJWT(this IServiceCollection services, IConfiguration jwtConfig)
@@ -122,7 +122,9 @@ namespace Ecommerce_Api.Extensions
             {
                 options.AddPolicy("Authorization", policy =>
                 {
+                    policy.AddAuthenticationSchemes(new[] {JwtBearerDefaults.AuthenticationScheme});
                     policy.Requirements.Add(new AuthRequirement());
+                    policy.Build();
                 });
             });
 
