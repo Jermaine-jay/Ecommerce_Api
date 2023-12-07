@@ -10,9 +10,8 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Ecommerce_Api.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize(Policy = "Authorization")]
-
     [ApiController]
+    [Authorize(Policy = "Authorization")]
     public class UserController : ControllerBase
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -25,7 +24,7 @@ namespace Ecommerce_Api.Controllers
         }
 
 
-        [HttpGet("Profile", Name = "Profile")]
+        [HttpGet("profile", Name = "profile")]
         [SwaggerOperation(Summary = "get loggedin user account ")]
         [SwaggerResponse(StatusCodes.Status200OK, Description = "user", Type = typeof(ProfileResponse))]
         [SwaggerResponse(StatusCodes.Status404NotFound, Description = "User Not Found", Type = typeof(ErrorResponse))]
@@ -89,7 +88,7 @@ namespace Ecommerce_Api.Controllers
         public async Task<IActionResult> GetCart()
         {
             string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
-            var response = await _userService.GetCart("994f5f3d-f22b-407e-8016-ee7ed508da4e");
+            var response = await _userService.GetCart(userId);
             return Ok(response);
         }
 
@@ -103,7 +102,7 @@ namespace Ecommerce_Api.Controllers
         public async Task<IActionResult> AddToCart([FromBody] AddToCartRequest request)
         {
             string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
-            var response = await _userService.AddToCart("994f5f3d-f22b-407e-8016-ee7ed508da4e", request);
+            var response = await _userService.AddToCart(userId, request);
             return Ok(response);
         }
 
@@ -131,7 +130,7 @@ namespace Ecommerce_Api.Controllers
         public async Task<IActionResult> DeleteCartItems()
         {
             string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
-            var response = await _userService.DeleteCartItems("994f5f3d-f22b-407e-8016-ee7ed508da4e");
+            var response = await _userService.DeleteCartItems(userId);
             return Ok(response);
         }
     }

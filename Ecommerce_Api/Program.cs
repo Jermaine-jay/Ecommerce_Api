@@ -40,10 +40,10 @@ builder.Services.AddAuthentication()
 })
 
 .AddFacebook(facebookOptions =>
- {
-     facebookOptions.AppId = builder.Configuration["Authentication:Facebook:AppId"];
-     facebookOptions.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
- });
+{
+    facebookOptions.AppId = builder.Configuration["Authentication:Facebook:AppId"];
+    facebookOptions.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
+});
 
 builder.Services.AddMvc();
 
@@ -103,9 +103,9 @@ app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 app.MapControllers();
 
 
-await app.SeedRole();
+/*await app.SeedRole();
 await app.ClaimSeeder();
 await app.ProductSeeder();
-await app.SeededUserAsync();
+await app.SeededUserAsync();*/
 
 app.Run();
