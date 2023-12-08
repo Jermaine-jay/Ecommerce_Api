@@ -23,7 +23,7 @@ namespace Ecommerce_Api.Controllers
         }
 
 
-  
+
         [HttpPost("paystackpayment", Name = "paystackpayment")]
         [SwaggerOperation(Summary = "paystack payment system")]
         [SwaggerResponse(StatusCodes.Status200OK, Description = "Transaction Details", Type = typeof(TransactionResponse))]
