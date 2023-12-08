@@ -1,6 +1,6 @@
 # Ecommerce Api Application
 ____
-#### This Application is a web application built with ASP.NET API, Entity Framework Core, Redis, PostgreSQL, Google auth API, Facebook auth API, and Docker. This application makes online shopping easier and faster, with no payment issues.
+#### This Application is a web application built with ASP.NET API, Entity Framework Core, Redis, PostgreSQL, Google auth API, Facebook auth API, Paystack payment system, Flutterwave payment system, and Docker. This application makes online shopping easier and faster, with no payment issues.
 
 
 ## Technologies
