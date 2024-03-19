@@ -12,9 +12,9 @@ services:
     image: postgres:latest
     container_name: app_db
     environment:
-      - POSTGRES_USER=posgres_database_708a_user
-      - POSTGRES_PASSWORD=xgjpQtW5m5jbITR9NPDwFmqXQXgk7G7T
-      - POSTGRES_DB=posgres_database_708a
+      - POSTGRES_USER=applicationdb_ktxw_user
+      - POSTGRES_PASSWORD=xhTK3YGa03N4FA7wN3fxZMlqi4geZmIq
+      - POSTGRES_DB=applicationdb_ktxw
     ports:
       - 5432:5433
 
@@ -30,7 +30,7 @@ services:
     depends_on:
         - "app_db"
     environment: 
-         - ConnectionStrings:DefaultConnection="Host=dpg-clksb9maov6s738n3g80-a.oregon-postgres.render.com;Database=applicationdb_0u5v;Username=jermaine;Password=b0OfJlHRIVX2ccznWC7C2jOwbR4sx8QL;Port=5432;"
+         - ConnectionStrings:DefaultConnection="Host=dpg-cnst6a0cmk4c73eqofq0-a.oregon-postgres.render.com;Database=applicationdb_ktxw;Username=applicationdb_ktxw_user;Password=xhTK3YGa03N4FA7wN3fxZMlqi4geZmIq;Port=5432;"
          - ASPNETCORE_URLS=http://+80;
 
 
