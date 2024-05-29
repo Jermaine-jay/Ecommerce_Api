@@ -21,7 +21,7 @@ namespace Ecommerce_Api.Controllers
             _adminService = adminService;
         }
 
-        [AllowAnonymous]
+       
         [HttpGet("all-users", Name = "all-users")]
         [SwaggerOperation(Summary = "Get All Registered Users")]
         [SwaggerResponse(StatusCodes.Status200OK, Description = "Users", Type = typeof(ApplicationUserDto))]
