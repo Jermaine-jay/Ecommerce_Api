@@ -138,7 +138,7 @@ namespace Ecommerce_Api.Extensions
             configurationOptions.Ssl = true;
             configurationOptions.Password = config["RedisConfig:Password"];
             configurationOptions.AbortOnConnectFail = false;
-            configurationOptions.EndPoints.Add(config["RedisConfig:Host"], 16360);
+            configurationOptions.EndPoints.Add(config["RedisConfig:Host"], 10641);
 
 
             services.AddStackExchangeRedisCache(options =>

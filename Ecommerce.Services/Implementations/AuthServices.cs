@@ -280,7 +280,7 @@ namespace Ecommerce.Services.Implementations
         public async Task<AuthenticationResponse> UserLogin(LoginRequest request)
         {
             var maxAttempt = 5;
-            ApplicationUser? user = await _userManager.FindByEmailAsync(request.Email.ToLower().Trim());
+            ApplicationUser user = await _userManager.FindByEmailAsync(request.Email.ToLower().Trim());
             if (user == null)
                 throw new InvalidOperationException("Invalid username or password");
 
