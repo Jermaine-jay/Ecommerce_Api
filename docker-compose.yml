@@ -12,9 +12,9 @@ services:
     image: postgres:latest
     container_name: app_db
     environment:
-      - POSTGRES_USER=applicationdb_ktxw_user
-      - POSTGRES_PASSWORD=xhTK3YGa03N4FA7wN3fxZMlqi4geZmIq
-      - POSTGRES_DB=applicationdb_ktxw
+      - POSTGRES_USER=app_database_0wdd_user
+      - POSTGRES_PASSWORD=0VY459gOzD0gwkDKPoCVaVWafQ5neZr8
+      - POSTGRES_DB=app_database_0wdd
     ports:
       - 5432:5433
 
