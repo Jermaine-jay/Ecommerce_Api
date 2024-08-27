@@ -84,9 +84,28 @@ builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 
 
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Ecommerce_Api v1");
+        c.InjectStylesheet("/css/Swagger-dark-theme.css");
+    });
+}
+else
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Ecommerce_Api v1");
+        c.InjectStylesheet("/css/Swagger-dark-theme.css");
+    });
 
+}
+
+app.UseStaticFiles();
 
 app.UseCors("CorsPolicy");
 app.UseRouting();
