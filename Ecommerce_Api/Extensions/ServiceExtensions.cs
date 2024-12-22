@@ -7,6 +7,7 @@ using Ecommerce.Services.Configurations.Cache.Otp;
 using Ecommerce.Services.Configurations.Cache.Security;
 using Ecommerce.Services.Configurations.Jwt;
 using Ecommerce.Services.Implementations;
+using Ecommerce.Services.Infrastructure;
 using Ecommerce.Services.Interfaces;
 using Ecommerce_Api.Attribute;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -26,24 +27,26 @@ namespace Ecommerce_Api.Extensions
     {
         public static void RegisterServices(this IServiceCollection services)
         {
-            services.AddScoped<IUnitOfWork, UnitOfWork<ApplicationDbContext>>();
+            services.AddSingleton<Settings>();
+            services.AddScoped<IOtpService, OtpService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IAuthServices, AuthServices>();
-            services.AddScoped<IJwtAuthenticator, JwtAuthenticator>();
             services.AddScoped<IAdminService, AdminService>();
             services.AddScoped<IOrderService, OrderService>();
-            services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IPaymentService, PaymentService>();
-            services.AddScoped<IRoleClaimService, RoleClaimService>();
-            services.AddScoped<IRoleService, RoleService>();
-            services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IEmailService, EmailService>();
-            services.AddScoped<IGenerateEmailPage, GenerateEmailPage>();
-            services.AddScoped<IOtpService, OtpService>();
-            services.AddScoped<IAuthorizationHandler, AuthHandler>();
-            services.AddScoped<IPaystackPaymentService, PaystackPaymentService>();
             services.AddScoped<ILoginAttempt, LoginAttempt>();
-            services.AddScoped<IFlutterwavePaymentService, FlutterwavePaymentService>();
             services.AddTransient<ICacheService, CacheService>();
+            services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<IServiceFactory, ServiceFactory>();
+            services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IAuthorizationHandler, AuthHandler>();
+            services.AddScoped<IRoleClaimService, RoleClaimService>();
+            services.AddScoped<IJwtAuthenticator, JwtAuthenticator>();
+            services.AddScoped<IGenerateEmailPage, GenerateEmailPage>();
+            services.AddScoped<IUnitOfWork, UnitOfWork<ApplicationDbContext>>();
+            services.AddScoped<IPaystackPaymentService, PaystackPaymentService>();
+            services.AddScoped<IFlutterwavePaymentService, FlutterwavePaymentService>();
         }
 
         public static void RegisterDbContext(this IServiceCollection services, string? connectionString)

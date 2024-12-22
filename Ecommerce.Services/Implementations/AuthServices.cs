@@ -6,11 +6,12 @@ using Ecommerce.Models.Enums;
 using Ecommerce.Services.Configurations.Cache.CacheServices;
 using Ecommerce.Services.Configurations.Cache.Otp;
 using Ecommerce.Services.Configurations.Cache.Security;
+using Ecommerce.Services.Extensions;
+using Ecommerce.Services.Infrastructure;
 using Ecommerce.Services.Interfaces;
 using Ecommerce.Services.Utilities;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
 
@@ -18,33 +19,34 @@ namespace Ecommerce.Services.Implementations
 {
     public class AuthServices : IAuthServices
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<ApplicationRole> _roleManager;
-        private readonly IJwtAuthenticator _jwtAuthenticator;
-        private readonly IConfiguration _configuration;
+        private FacebookConfig _facebookConfig;
+        private GoogleConfig _googleConfig;
         private readonly HttpClient _httpClient;
+        private readonly IOtpService _otpService;
         private readonly ICacheService _cacheService;
         private readonly ILoginAttempt _loginAttempt;
-        private readonly IOtpService _otpService;
         private readonly IEmailService _emailService;
+        private readonly IServiceFactory _serviceFactory;
+        private readonly IJwtAuthenticator _jwtAuthenticator;
+        private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-
-
-        public AuthServices(UserManager<ApplicationUser> userManager, IConfiguration configuration, 
-            RoleManager<ApplicationRole> roleManager, IJwtAuthenticator jwtAuthenticator, HttpClient httpClient, 
-            ICacheService cacheService, ILoginAttempt loginAttempt, IOtpService otpService, IEmailService emailService)
+        public AuthServices(UserManager<ApplicationUser> userManager,
+            RoleManager<ApplicationRole> roleManager, HttpClient httpClient,
+            FacebookConfig facebookConfig, GoogleConfig googleConfig, IServiceFactory serviceFactory)
         {
+            _serviceFactory = serviceFactory;
             _userManager = userManager;
-            _configuration = configuration;
             _roleManager = roleManager;
-            _jwtAuthenticator = jwtAuthenticator;
             _httpClient = httpClient;
-            _cacheService = cacheService;
-            _loginAttempt = loginAttempt;
-            _otpService = otpService;
-            _emailService = emailService;
+            _facebookConfig = facebookConfig;
+            _googleConfig = googleConfig;
+            _otpService = _serviceFactory.GetService<IOtpService>();
+            _cacheService = _serviceFactory.GetService<ICacheService>();
+            _loginAttempt = _serviceFactory.GetService<ILoginAttempt>();
+            _emailService = _serviceFactory.GetService<IEmailService>();
+            _jwtAuthenticator = _serviceFactory.GetService<IJwtAuthenticator>();
         }
-
 
         public async Task<object> ChangeSocialDetails()
         {
@@ -54,24 +56,25 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<AuthenticationResponse> GoogleAuth(string credential)
         {
-            
             var settings = new GoogleJsonWebSignature.ValidationSettings()
             {
-                Audience = new List<string>() { _configuration["Authentication:Google:ClientId"] }
+                Audience = new List<string>() {_googleConfig.ClientId}
             };
-            var payload = await GoogleJsonWebSignature.ValidateAsync(credential, settings);
+
+            GoogleJsonWebSignature.Payload payload = 
+                        await GoogleJsonWebSignature.ValidateAsync(credential, settings);
 
             if (payload == null)
                 throw new InvalidOperationException($"Invalid External Authentication.");
 
-            var info = new UserLoginInfo("GOOGLE", payload.Name, "GOOGLE");
+            UserLoginInfo info = new UserLoginInfo("GOOGLE", payload.Name, "GOOGLE");
             if (info == null)
                 throw new InvalidOperationException($"No user Info");
 
             var user = await _userManager.FindByEmailAsync(payload.Email);
             if (user == null)
             {
-                var newuser = new ApplicationUser
+                ApplicationUser newuser = new ApplicationUser
                 {
                     Id = Guid.NewGuid(),
                     Email = payload.Email,
@@ -81,6 +84,7 @@ namespace Ecommerce.Services.Implementations
                     Active = true,
                     UserType = UserType.User,
                 };
+
                 newuser.EmailConfirmed = true;
 
                 var result = await _userManager.CreateAsync(newuser);
@@ -90,11 +94,11 @@ namespace Ecommerce.Services.Implementations
                     throw new InvalidOperationException(message);
                 }
 
-                var cart = new Cart();
-                var key = $"cart:{newuser.Id}";
+                Cart cart = new Cart();
+                string key = $"cart:{newuser.Id}";
                 await _cacheService.WriteToCache(key, cart, null, TimeSpan.FromDays(365));
 
-                var role = UserType.User.GetStringValue();
+                string role = UserType.User.GetStringValue();
                 bool roleExists = await _roleManager.RoleExistsAsync(role);
 
                 if (!roleExists)
@@ -103,12 +107,11 @@ namespace Ecommerce.Services.Implementations
                     await _roleManager.CreateAsync(newRole);
                 }
 
-
                 await _userManager.AddToRoleAsync(newuser, role);
                 await _userManager.AddLoginAsync(newuser, info);
 
-                var jwttoken = await _jwtAuthenticator.GenerateJwtToken(newuser);
-                var fullname = $"{newuser.LastName} {newuser.FirstName}";
+                JwtToken jwttoken = await _jwtAuthenticator.GenerateJwtToken(newuser);
+                string fullname = $"{newuser.LastName} {newuser.FirstName}";
                 return new AuthenticationResponse
                 {
                     JwtToken = jwttoken,
@@ -119,13 +122,12 @@ namespace Ecommerce.Services.Implementations
                 };
             }
 
-
-            var existuser = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+            ApplicationUser? existuser = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
             if (existuser == null)
                 throw new InvalidOperationException($"User Does Not exist");
 
-            var jwtToken = await _jwtAuthenticator.GenerateJwtToken(existuser);
-            var newUserFullname = $"{existuser.LastName} {existuser.FirstName}";
+            JwtToken jwtToken = await _jwtAuthenticator.GenerateJwtToken(existuser);
+            string newUserFullname = $"{existuser.LastName} {existuser.FirstName}";
             return new AuthenticationResponse
             {
                 JwtToken = jwtToken,
@@ -133,24 +135,25 @@ namespace Ecommerce.Services.Implementations
                 FullName = newUserFullname,
                 TwoFactor = false,
                 IsExisting = true
-
             };
         }
 
         public async Task<AuthenticationResponse> FaceBookAuth(string credential)
         {
-            var debugTokenResponse = await _httpClient.GetAsync("https://graph.facebook.com/debug_token?input_token=" + credential + $"&access_token={_configuration["Authentication:Facebook:AppId"]}|{_configuration["Authentication:Facebook:AppSecret"]}");
+            string appId = _facebookConfig.AppId;
+            string appSecret = _facebookConfig.AppSecret;
+            HttpResponseMessage debugTokenResponse = await _httpClient.GetAsync("https://graph.facebook.com/debug_token?input_token=" + credential + $"&access_token={appId}|{appSecret}");
 
-            var stringThing = await debugTokenResponse.Content.ReadAsStringAsync();
-            var userOBJK = JsonConvert.DeserializeObject<FBUser>(stringThing);
+            string stringThing = await debugTokenResponse.Content.ReadAsStringAsync();
+            FBUser? userOBJK = JsonConvert.DeserializeObject<FBUser>(stringThing);
 
             if (userOBJK.Data.IsValid == false)
                 throw new InvalidOperationException("UnAuthorized user");
 
             HttpResponseMessage meResponse = await _httpClient.GetAsync("https://graph.facebook.com/me?fields=first_name,last_name,email,id&access_token=" + credential);
-            var userContent = await meResponse.Content.ReadAsStringAsync();
+            string userContent = await meResponse.Content.ReadAsStringAsync();
 
-            var payload = JsonConvert.DeserializeObject<FBUserInfo>(userContent);
+            FBUserInfo? payload = JsonConvert.DeserializeObject<FBUserInfo>(userContent);
             if (payload == null)
                 throw new InvalidOperationException($"Invalid External Authentication.");
 
@@ -161,7 +164,7 @@ namespace Ecommerce.Services.Implementations
             var user = await _userManager.FindByEmailAsync(payload.Email);
             if (user == null)
             {
-                var newuser = new ApplicationUser
+                ApplicationUser newuser = new ApplicationUser
                 {
                     Id = Guid.NewGuid(),
                     Email = payload.Email,
@@ -171,19 +174,22 @@ namespace Ecommerce.Services.Implementations
                     Active = true,
                     UserType = UserType.User,
                 };
+
                 newuser.EmailConfirmed = true;
 
-                var result = await _userManager.CreateAsync(newuser);
+                IdentityResult result = await _userManager.CreateAsync(newuser);
                 if (!result.Succeeded)
                 {
-                    var message = $"Failed to create user: {(result.Errors.FirstOrDefault())?.Description}";
+                    string message = $"Failed to create user: {(result.Errors.FirstOrDefault())?.Description}";
                     throw new InvalidOperationException(message);
                 }
-                var cart = new Cart();
-                var key = $"cart:{newuser.Id}";
+
+                Cart cart = new Cart();
+                string key = $"cart:{newuser.Id}";
+
                 await _cacheService.WriteToCache(key, cart, null, TimeSpan.FromDays(365));
 
-                var role = UserType.User.GetStringValue();
+                string role = UserType.User.GetStringValue();
                 bool roleExists = await _roleManager.RoleExistsAsync(role);
 
                 if (!roleExists)
@@ -192,12 +198,12 @@ namespace Ecommerce.Services.Implementations
                     await _roleManager.CreateAsync(newRole);
                 }
 
-
                 await _userManager.AddToRoleAsync(newuser, role);
                 await _userManager.AddLoginAsync(newuser, info);
 
-                var jwttoken = await _jwtAuthenticator.GenerateJwtToken(newuser);
-                var newUserFullname = $"{newuser.LastName} {newuser.FirstName}";
+                JwtToken jwttoken = await _jwtAuthenticator.GenerateJwtToken(newuser);
+                string newUserFullname = $"{newuser.LastName} {newuser.FirstName}";
+
                 return new AuthenticationResponse
                 {
                     JwtToken = jwttoken,
@@ -205,16 +211,16 @@ namespace Ecommerce.Services.Implementations
                     FullName = newUserFullname,
                     TwoFactor = false,
                     IsExisting = false,
-
                 };
             }
 
-            var existuser = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+            ApplicationUser? existuser = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
             if (existuser == null)
                 throw new InvalidOperationException($"User Does Not exist");
 
-            var jwtToken = await _jwtAuthenticator.GenerateJwtToken(user);
-            var fullname = $"{user.LastName} {user.FirstName}";
+            JwtToken jwtToken = await _jwtAuthenticator.GenerateJwtToken(user);
+            string fullname = $"{user.LastName} {user.FirstName}";
+
             return new AuthenticationResponse
             {
                 JwtToken = jwtToken,
@@ -222,7 +228,6 @@ namespace Ecommerce.Services.Implementations
                 FullName = fullname,
                 TwoFactor = false,
                 IsExisting = true
-
             };
         }
 
@@ -232,11 +237,9 @@ namespace Ecommerce.Services.Implementations
             if (existingUser != null)
                 throw new InvalidOperationException($"User already exists with Email {request.Email}");
 
-
-            var emailExist = await _userManager.FindByNameAsync(request.Email);
+            ApplicationUser? emailExist = await _userManager.FindByNameAsync(request.Email);
             if (emailExist != null)
                 throw new InvalidOperationException($"User already exists");
-
 
             ApplicationUser user = new()
             {
@@ -251,7 +254,6 @@ namespace Ecommerce.Services.Implementations
                 EmailConfirmed = true,
             };
 
-
             IdentityResult result = await _userManager.CreateAsync(user, request.Password);
             if (!result.Succeeded)
             {
@@ -259,11 +261,11 @@ namespace Ecommerce.Services.Implementations
                 throw new InvalidOperationException(message);
             }
 
-            var cart = new Cart();
-            var key = CacheKeySelector.UserCartCacheKey(user.Id.ToString());
+            Cart cart = new();
+            string key = CacheKeySelector.UserCartCacheKey(user.Id.ToString());
             await _cacheService.WriteToCache(key, cart, null, TimeSpan.FromDays(365));
 
-            var role = UserType.User.GetStringValue();
+            string? role = UserType.User.GetStringValue();
             bool roleExists = await _roleManager.RoleExistsAsync(role);
 
             if (!roleExists)
@@ -280,7 +282,7 @@ namespace Ecommerce.Services.Implementations
         public async Task<AuthenticationResponse> UserLogin(LoginRequest request)
         {
             var maxAttempt = 5;
-            ApplicationUser user = await _userManager.FindByEmailAsync(request.Email.ToLower().Trim());
+            ApplicationUser? user = await _userManager.FindByEmailAsync(request.Email.ToLower().Trim());
             if (user == null)
                 throw new InvalidOperationException("Invalid username or password");
 
@@ -293,8 +295,8 @@ namespace Ecommerce.Services.Implementations
             if (user.LockoutEnd != null)
                 throw new InvalidOperationException($"User Suspended. Time Left {user.LockoutEnd - DateTimeOffset.UtcNow}");
 
-            var key = await _loginAttempt.LoginAttemptAsync(user.Id.ToString());
-            var check = await _loginAttempt.CheckLoginAttemptAsync(user.Id.ToString());
+            string key = await _loginAttempt.LoginAttemptAsync(user.Id.ToString());
+            AttemptDto check = await _loginAttempt.CheckLoginAttemptAsync(user.Id.ToString());
             if (check.Attempts == maxAttempt)
             {
                 DateTimeOffset lockoutEnd = DateTimeOffset.UtcNow.AddSeconds(300);
@@ -330,10 +332,9 @@ namespace Ecommerce.Services.Implementations
         public async Task<SuccessResponse> ChangePassword(string userId, ChangePasswordRequest request)
         {
 
-            ApplicationUser user = await _userManager.FindByIdAsync(userId);
+            ApplicationUser? user = await _userManager.FindByIdAsync(userId);
             if (user == null)
                 throw new InvalidOperationException("User Not Found");
-
 
             await _userManager.ChangePasswordAsync(user, request.NewPassword, request.CurrentPassword);
             return new SuccessResponse
@@ -348,17 +349,15 @@ namespace Ecommerce.Services.Implementations
             if (existingUser != null)
                 throw new InvalidOperationException($"Invalid Email Address");
 
-
-            var user = await _userManager.FindByEmailAsync(request.Email);
-            var isConfrimed = await _userManager.IsEmailConfirmedAsync(user);
+            ApplicationUser? user = await _userManager.FindByEmailAsync(request.Email);
+            bool isConfrimed = await _userManager.IsEmailConfirmedAsync(user);
             if (user == null || !isConfrimed)
                 throw new InvalidOperationException($"User does not exist");
 
             if (user.LockoutEnd != null)
                 throw new InvalidOperationException($"User Suspended. Time Left {user.LockoutEnd - DateTimeOffset.UtcNow}");
 
-
-            var result = await _emailService.ResetPasswordMail(user);
+            string result = await _emailService.ResetPasswordMail(user);
             return new ResetPasswordResponse
             {
                 Message = "Token sent",
@@ -371,24 +370,20 @@ namespace Ecommerce.Services.Implementations
         {
             var (existingUser, operation) = await DecodeToken.DecodeVerificationToken(request.Token);
 
-            ApplicationUser user = await _userManager.FindByIdAsync(existingUser);
+            ApplicationUser? user = await _userManager.FindByIdAsync(existingUser);
             if (user == null || !user.EmailConfirmed)
                 throw new InvalidOperationException($"User does not exist");
 
-
             if (operation != OtpOperation.PasswordReset.ToString())
                 throw new InvalidOperationException($"Invalid Operation");
-
 
             bool isOtpValid = await _otpService.VerifyOtpAsync(user.Id.ToString(), request.Token, OtpOperation.PasswordReset);
             if (!isOtpValid)
                 throw new InvalidOperationException($"Invalid Token");
 
-
             IdentityResult result = await _userManager.ChangePasswordAsync(user, request.NewPassword, request.ConfirmPassword);
             if (!result.Succeeded)
                 throw new InvalidOperationException($"Could not complete operation");
-
 
             return new SuccessResponse
             {

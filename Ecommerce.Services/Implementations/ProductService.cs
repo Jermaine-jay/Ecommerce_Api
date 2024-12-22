@@ -23,19 +23,17 @@ namespace Ecommerce.Services.Implementations
         private readonly IRepository<ProductImage> _productImagesRepo;
         private readonly IRepository<ProductVariation> _productVariationRepo;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IConfiguration _configuration;
+        private Settings _settings;
 
 
-        public ProductService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IConfiguration configuration)
+        public ProductService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _categoryRepo = _unitOfWork.GetRepository<Category>();
             _productRepo = _unitOfWork.GetRepository<Product>();
             _productImagesRepo = _unitOfWork.GetRepository<ProductImage>();
             _productVariationRepo = _unitOfWork.GetRepository<ProductVariation>();
-            _configuration = configuration;
         }
-
 
         public async Task<CreateProductResponse> CreateProduct(CreateProductRequest request)
         {
@@ -70,7 +68,7 @@ namespace Ecommerce.Services.Implementations
             if (product == null)
                 throw new InvalidOperationException("Product does not exist");
 
-            if(!request.CategoryName.IsNullOrEmpty() && request.CategoryName != "string")
+            if (!request.CategoryName.IsNullOrEmpty() && request.CategoryName != "string")
             {
                 var category = await _categoryRepo.GetSingleByAsync(p => p.Name == request.CategoryName.ToLower());
                 if (category == null)
@@ -79,7 +77,6 @@ namespace Ecommerce.Services.Implementations
                 product.CategoryId = category.Id;
             }
 
-
             product.Name = request.Name.ToLower() ?? product.Name;
             product.Description = request.Description ?? product.Description;
             product.UpdatedAt = DateTime.UtcNow;
@@ -87,7 +84,7 @@ namespace Ecommerce.Services.Implementations
             await _productRepo.UpdateAsync(product);
             return new ProductUpdateResponse
             {
-                Name = product.Name, 
+                Name = product.Name,
                 Description = product.Description,
                 CategoryId = product.CategoryId.ToString(),
                 CategoryName = product.Category.Name
@@ -106,7 +103,7 @@ namespace Ecommerce.Services.Implementations
             if (!allvar.Any())
                 throw new InvalidOperationException("None Found");
 
-            var cloudinary = new CloudinaryDotNet.Cloudinary(new Account(_configuration["CloudinarySettings:CloudName"], _configuration["CloudinarySettings:ApiKey"], _configuration["CloudinarySettings:ApiSecret"]));
+            Cloudinary cloudinary = new(new Account(_settings.CloudinarySettings.CloudName, _settings.CloudinarySettings.ApiKey, _settings.CloudinarySettings.ApiSecret));
 
             var deletionParamsList = allvar.SelectMany(item => item.ProductImages.Select(image => new DeletionParams(image.PublicId))).ToList();
             await Task.WhenAll(deletionParamsList.Select(param => cloudinary.DestroyAsync(param)));
@@ -136,7 +133,7 @@ namespace Ecommerce.Services.Implementations
             if (files == null || !files.Any())
                 throw new InvalidOperationException("File cannot be empty");
 
-            var cloudinary = new Cloudinary(new Account(_configuration["CloudinarySettings:CloudName"], _configuration["CloudinarySettings:ApiKey"], _configuration["CloudinarySettings:ApiSecret"]));
+            Cloudinary cloudinary = new(new Account(_settings.CloudinarySettings.CloudName, _settings.CloudinarySettings.ApiKey, _settings.CloudinarySettings.ApiSecret));
             if (cloudinary == null)
                 throw new InvalidOperationException("Invalid Cloud parameters");
 
@@ -173,8 +170,8 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<SuccessResponse> AddVariations(ProductVarionRequest request)
         {
-            var product = await _productRepo.GetSingleByAsync(p => p.Id.ToString() == request.ProductId, include: u=> u.Include(u=>u.ProductVariation))
-                ??throw new InvalidOperationException("Product does not exist");
+            var product = await _productRepo.GetSingleByAsync(p => p.Id.ToString() == request.ProductId, include: u => u.Include(u => u.ProductVariation))
+                ?? throw new InvalidOperationException("Product does not exist");
 
             var colour = Colour.AsDisplayed;
             switch (request.Colour)
@@ -204,7 +201,7 @@ namespace Ecommerce.Services.Implementations
                     break;
             }
 
-            var newVar = new ProductVariation
+            ProductVariation newVar = new ProductVariation
             {
                 Id = Guid.NewGuid(),
                 Colour = colour,
@@ -214,7 +211,7 @@ namespace Ecommerce.Services.Implementations
             };
 
             await _productVariationRepo.AddAsync(newVar);
-            if(request.files != null)
+            if (request.files != null)
             {
                 var images = await AddImages(newVar.Id, request.files);
             }
@@ -231,8 +228,8 @@ namespace Ecommerce.Services.Implementations
             if (image != null)
                 throw new InvalidOperationException("Image does not exist");
 
-            var cloudinary = new CloudinaryDotNet.Cloudinary(new Account(_configuration["CloudinarySettings:CloudName"], _configuration["CloudinarySettings:ApiKey"], _configuration["CloudinarySettings:ApiSecret"]));
-            var param = new DeletionParams(image.PublicId) { };
+            var param = new DeletionParams(image.PublicId) { }; 
+            Cloudinary cloudinary = new(new Account(_settings.CloudinarySettings.CloudName, _settings.CloudinarySettings.ApiKey, _settings.CloudinarySettings.ApiSecret));
 
             await cloudinary.DestroyAsync(param);
             await _productImagesRepo.DeleteAsync(image);
@@ -270,10 +267,10 @@ namespace Ecommerce.Services.Implementations
         public async Task<ProductDto> GetProductAsync(string productId)
         {
             var product = await _productRepo.GetSingleByAsync(pro => pro.Id.ToString() == productId, include: u => u.Include(p => p.ProductVariation))
-                ??throw new InvalidOperationException("No Product Found");
+                ?? throw new InvalidOperationException("No Product Found");
 
             var variation = product.ProductVariation.FirstOrDefault()
-                ??throw new InvalidOperationException("No Product variation Found");
+                ?? throw new InvalidOperationException("No Product variation Found");
 
             return new ProductDto
             {

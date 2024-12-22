@@ -32,7 +32,6 @@ namespace Ecommerce.Services.Implementations
             _httpClient = new HttpClient();
         }
 
-
         public async Task<TransactionResponse> MakePayment(string userId, string orderId)
         {
             var order = await _orderRepo.GetSingleByAsync(order => order.Id.ToString() == orderId)
@@ -70,7 +69,6 @@ namespace Ecommerce.Services.Implementations
             return response;
         }
 
-
         public async Task<VerifyTransactionResponse> VerifyPayment(string referenceCode)
         {
             var order = await _orderRepo.GetAllAsync()
@@ -97,7 +95,6 @@ namespace Ecommerce.Services.Implementations
 
             return response;
         }
-
 
         public async Task<TransactionResponse> BankCharge(BankPaymentRequest request, string userId)
         {
@@ -136,7 +133,6 @@ namespace Ecommerce.Services.Implementations
             return response;
         }
 
-
         public async Task<ChargeResponse> VerifyBankCharge(string refrence, string otp)
         {
             var order = await _orderRepo.GetSingleByAsync(order => order.Txnref.ToString() == refrence)
@@ -151,6 +147,7 @@ namespace Ecommerce.Services.Implementations
                 await _orderRepo.UpdateAsync(order);
                 return result;
             }
+
             return result;
         }
 
@@ -175,8 +172,10 @@ namespace Ecommerce.Services.Implementations
                     ExpiryMonth = request.ExipiryMonth,
                     ExpiryYear = request.ExipiryYear
                 },
+
                 Reference = Guid.NewGuid().ToString(),
             };
+
             var result = payStack.Charge.ChargeCard(cardChargeRequest, makeReferenceUnique: false);
             var response = new TransactionResponse
             {
@@ -206,6 +205,7 @@ namespace Ecommerce.Services.Implementations
                 AccountName = result.Data.AccountName,
                 AccountNumber = result.Data.AccountNumber,
             };
+
             return response;
         }
 
@@ -225,11 +225,9 @@ namespace Ecommerce.Services.Implementations
         public async Task<bool> IsServiceUpAsync()
         {
             _httpClient.BaseAddress = new Uri("https://api.paystack.co/");
-
             var response = await _httpClient.GetAsync("/healthcheck");
 
             PayStackApi payStack = new(_secret);
-
             return response.IsSuccessStatusCode;
         }
     }

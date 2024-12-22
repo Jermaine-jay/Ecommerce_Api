@@ -1,5 +1,4 @@
 ﻿using Ecommerce.Services.Interfaces;
-using PayStack.Net;
 
 
 namespace Ecommerce.Services.Implementations
@@ -17,19 +16,17 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<string> AvailableSystem()
         {
-            var payment = "";
+            string payment = "";
 
-            var paystack =  _paystackPaymentService.IsServiceUpAsync();
-            var flutter =  _flutterwavePaymentService.IsServiceUpAsync();
+            var paystack = _paystackPaymentService.IsServiceUpAsync();
+            var flutter = _flutterwavePaymentService.IsServiceUpAsync();
 
             await Task.WhenAny(paystack, flutter);
 
-           if(paystack.IsCompletedSuccessfully) { return "paystack"; }
-           if(flutter.IsCompletedSuccessfully) { return "flutter"; }
+            if (paystack.IsCompletedSuccessfully) { return "paystack"; }
+            if (flutter.IsCompletedSuccessfully) { return "flutter"; }
 
-
-
-           return null;
+            return null;
         }
     }
 

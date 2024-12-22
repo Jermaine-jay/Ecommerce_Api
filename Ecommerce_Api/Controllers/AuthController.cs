@@ -26,8 +26,6 @@ namespace Ecommerce_Api.Controllers
             _httpContextAccessor = httpContextAccessor;
         }
 
-
-
         [AllowAnonymous]
         [HttpPost("register", Name = "register")]
         [SwaggerOperation(Summary = "register user")]
@@ -40,7 +38,6 @@ namespace Ecommerce_Api.Controllers
             var response = await _authServices.RegisterUser(request);
             return Ok(response);
         }
-
 
         [AllowAnonymous]
         [HttpPost("LoginWithFacebook", Name = "LoginWithFacebook")]
@@ -58,16 +55,14 @@ namespace Ecommerce_Api.Controllers
             return Ok(result);
         }
 
-
-
         [AllowAnonymous]
-        [HttpPost("LoginWithGoogle")]
+        [HttpPost("LoginWithGoogle", Name = "LoginWithGoogle")]
         [SwaggerOperation(Summary = "Authenticates a user with google")]
         [SwaggerResponse(StatusCodes.Status200OK, Description = "user token", Type = typeof(AuthenticationResponse))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "No info", Type = typeof(ErrorResponse))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Invalid external authentication", Type = typeof(ErrorResponse))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "Internal error", Type = typeof(ErrorResponse))]
-        public async Task<IActionResult> GoogleAuth([FromBody] string accessToken)
+        public async Task<IActionResult> GoogleAuth(string accessToken)
         {
             var response = await _authServices.GoogleAuth(accessToken);
             if (!response.IsExisting)
@@ -75,8 +70,6 @@ namespace Ecommerce_Api.Controllers
 
             return Ok(response);
         }
-
-
 
         [HttpPost("change-password")]
         [SwaggerOperation(Summary = "Change user password")]
@@ -118,7 +111,6 @@ namespace Ecommerce_Api.Controllers
             var response = await _authServices.ForgotPassword(request);
             return Ok(response);
         }
-
 
         [AllowAnonymous]
         [HttpPut("reset-password", Name = "reset-password")]
