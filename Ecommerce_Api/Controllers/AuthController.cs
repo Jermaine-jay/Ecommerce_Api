@@ -27,7 +27,6 @@ namespace Ecommerce_Api.Controllers
         }
 
 
-
         [AllowAnonymous]
         [HttpPost("register", Name = "register")]
         [SwaggerOperation(Summary = "register user")]
@@ -37,7 +36,7 @@ namespace Ecommerce_Api.Controllers
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Type = typeof(ErrorResponse))]
         public async Task<IActionResult> RegisterUser([FromBody] UserRegistrationRequest request)
         {
-            var response = await _authServices.RegisterUser(request);
+            ApplicationUser response = await _authServices.RegisterUser(request);
             return Ok(response);
         }
 
@@ -51,14 +50,12 @@ namespace Ecommerce_Api.Controllers
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "Internal error", Type = typeof(ErrorResponse))]
         public async Task<IActionResult> FacebookAuth([FromBody] string accessToken)
         {
-            var result = await _authServices.FaceBookAuth(accessToken);
+            AuthenticationResponse result = await _authServices.FaceBookAuth(accessToken);
             if (!result.IsExisting)
                 return RedirectToAction(nameof(ChangePassword));
 
             return Ok(result);
         }
-
-
 
         [AllowAnonymous]
         [HttpPost("LoginWithGoogle")]
@@ -69,14 +66,12 @@ namespace Ecommerce_Api.Controllers
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "Internal error", Type = typeof(ErrorResponse))]
         public async Task<IActionResult> GoogleAuth([FromBody] string accessToken)
         {
-            var response = await _authServices.GoogleAuth(accessToken);
+            AuthenticationResponse response = await _authServices.GoogleAuth(accessToken);
             if (!response.IsExisting)
                 return RedirectToAction(nameof(ChangePassword));
 
             return Ok(response);
         }
-
-
 
         [HttpPost("change-password")]
         [SwaggerOperation(Summary = "Change user password")]
@@ -87,11 +82,9 @@ namespace Ecommerce_Api.Controllers
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
             string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
-            var response = await _authServices.ChangePassword(userId, request);
+            SuccessResponse response = await _authServices.ChangePassword(userId, request);
             return Ok(response);
         }
-
-
 
         [AllowAnonymous]
         [HttpPost("login", Name = "login")]
@@ -101,10 +94,9 @@ namespace Ecommerce_Api.Controllers
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
         public async Task<IActionResult> LoginUser([FromBody] LoginRequest loginRequest)
         {
-            var response = await _authServices.UserLogin(loginRequest);
+            AuthenticationResponse response = await _authServices.UserLogin(loginRequest);
             return Ok(response);
         }
-
 
         [AllowAnonymous]
         [HttpPost("forgot-password", Name = "forgot-password")]
@@ -115,7 +107,7 @@ namespace Ecommerce_Api.Controllers
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {
-            var response = await _authServices.ForgotPassword(request);
+            ResetPasswordResponse response = await _authServices.ForgotPassword(request);
             return Ok(response);
         }
 
@@ -130,7 +122,7 @@ namespace Ecommerce_Api.Controllers
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
         public async Task<IActionResult> ResetPassword([FromQuery] ResetPasswordRequest request)
         {
-            var response = await _authServices.ResetPassword(request);
+            SuccessResponse response = await _authServices.ResetPassword(request);
             if (response.Success)
                 return RedirectToAction("LoginUser");
 

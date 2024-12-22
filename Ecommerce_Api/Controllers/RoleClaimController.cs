@@ -10,7 +10,6 @@ namespace Ecommerce_Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(Policy = "Authorization")]
-    [AllowAnonymous]
     public class RoleClaimController : ControllerBase
     {
         private readonly IRoleClaimService _userClaimsService;
@@ -20,7 +19,6 @@ namespace Ecommerce_Api.Controllers
             _userClaimsService = userClaimsService;
         }
 
-
         [HttpGet("get-claims", Name = "get-claims")]
         [SwaggerOperation(Summary = "claims of selected role")]
         [SwaggerResponse(StatusCodes.Status200OK, Description = "Returns claim types and values", Type = typeof(RoleClaimResponse))]
@@ -28,11 +26,9 @@ namespace Ecommerce_Api.Controllers
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
         public async Task<IActionResult> GetClaims(string role)
         {
-            var result = await _userClaimsService.GetUserClaims(role);
+            SuccessResponse result = await _userClaimsService.GetUserClaims(role);
             return Ok(result);
         }
-
-
 
         [HttpPost("add-claim", Name = "add-claim")]
         [SwaggerOperation(Summary = "add claim to role")]
@@ -41,11 +37,9 @@ namespace Ecommerce_Api.Controllers
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
         public async Task<IActionResult> AddClaim([FromBody] RoleClaimRequest request)
         {
-            var result = await _userClaimsService.AddClaim(request);
+            RoleClaimResponse result = await _userClaimsService.AddClaim(request);
             return Ok(result);
         }
-
-
 
         [HttpDelete("delete-claim", Name = "delete-claim")]
         [SwaggerOperation(Summary = "deletes claims")]
@@ -58,8 +52,6 @@ namespace Ecommerce_Api.Controllers
             return Ok();
         }
 
-
-
         [HttpPut("edit-claim", Name = "edit-claim")]
         [SwaggerOperation(Summary = "edit claim")]
         [SwaggerResponse(StatusCodes.Status200OK, Description = "Success", Type = typeof(RoleClaimResponse))]
@@ -67,7 +59,7 @@ namespace Ecommerce_Api.Controllers
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
         public async Task<IActionResult> EditClaim([FromBody] UpdateRoleClaimsDto request)
         {
-            var response = await _userClaimsService.UpdateRoleClaims(request);
+            RoleClaimResponse response = await _userClaimsService.UpdateRoleClaims(request);
             return Ok(response);
         }
     }

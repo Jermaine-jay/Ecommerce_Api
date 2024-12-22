@@ -25,7 +25,7 @@ namespace Ecommerce_Api.Controllers
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "order", Type = typeof(ErrorResponse))]
         public async Task<IActionResult> CheckService()
         {
-            var response = await _paymentService.AvailableSystem();
+            string response = await _paymentService.AvailableSystem();
             if(response == "paystack")
                 return RedirectToAction("PaystackCardPayment", "Paystack");
 
