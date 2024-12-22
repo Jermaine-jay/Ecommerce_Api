@@ -30,11 +30,9 @@ namespace Ecommerce_Api.Controllers
         public async Task<IActionResult> GetUser()
         {
             string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
-            var response = await _orderService.ClearCart(userId);
+            SuccessResponse response = await _orderService.ClearCart(userId);
             return Ok(response);
         }
-
-
 
         [HttpPost("createorder", Name = "createorder")]
         [SwaggerOperation(Summary = "user creates order")]
@@ -45,7 +43,7 @@ namespace Ecommerce_Api.Controllers
         public async Task<IActionResult> CreateOrder([FromBody] OrderRequest request)
         {
             string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
-            var response = await _orderService.CreateOrder(userId, request);
+            OrderResponse response = await _orderService.CreateOrder(userId, request);
             return Ok(response);
         }
 
@@ -60,7 +58,7 @@ namespace Ecommerce_Api.Controllers
         public async Task<IActionResult> ShippingAddress([FromBody] OrderRequest request)
         {
             string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
-            var response = await _orderService.CreateOrder(userId, request);
+            OrderResponse response = await _orderService.CreateOrder(userId, request);
             return Ok(response);
         }
     }

@@ -1,9 +1,7 @@
 ﻿using Ecommerce.Models.Dtos.Requests;
 using Ecommerce.Models.Dtos.Responses;
 using Ecommerce.Models.Entities;
-using Ecommerce.Services.Implementations;
 using Ecommerce.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -19,7 +17,6 @@ namespace Ecommerce_Api.Controllers
             _productService = productService;
         }
 
-
         [HttpPost("create-product", Name = "create-product")]
         [SwaggerOperation(Summary = "create new product ")]
         [SwaggerResponse(StatusCodes.Status201Created, Description = "Product", Type = typeof(CreateProductResponse))]
@@ -33,7 +30,6 @@ namespace Ecommerce_Api.Controllers
             return Ok(response);
         }
 
-
         [HttpPut("update-product", Name = "update-product")]
         [SwaggerOperation(Summary = "update existing product ")]
         [SwaggerResponse(StatusCodes.Status201Created, Description = "Product", Type = typeof(SuccessResponse))]
@@ -43,10 +39,9 @@ namespace Ecommerce_Api.Controllers
         public async Task<IActionResult> UpdateProduct([FromBody] UpdateProductRequest request)
         {
 
-            var response = await _productService.UpdateProduct(request);
+            SuccessResponse response = await _productService.UpdateProduct(request);
             return Ok(response);
         }
-
 
         [HttpDelete("delete-product", Name = "delete-product")]
         [SwaggerOperation(Summary = "delete existing product ")]
@@ -57,12 +52,10 @@ namespace Ecommerce_Api.Controllers
         public async Task<IActionResult> UpdateProduct(string productId)
         {
 
-            var response = await _productService.DeleteProduct(productId);
+            SuccessResponse response = await _productService.DeleteProduct(productId);
             return Ok(response);
         }
 
-
-        
         [HttpPost("addvariation", Name = "addvariation")]
         [SwaggerOperation(Summary = "add product varieties")]
         [SwaggerResponse(StatusCodes.Status201Created, Description = "true", Type = typeof(SuccessResponse))]
@@ -71,10 +64,9 @@ namespace Ecommerce_Api.Controllers
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
         public async Task<IActionResult> AddVariations([FromForm] ProductVarionRequest request)
         {
-            var response = await _productService.AddVariations(request);
+            SuccessResponse response = await _productService.AddVariations(request);
             return Ok(response);
         }
-
 
         [HttpDelete("delete-image", Name = "delete-image")]
         [SwaggerOperation(Summary = "delete product image")]
@@ -85,10 +77,9 @@ namespace Ecommerce_Api.Controllers
         public async Task<IActionResult> DeleteImage(string publicId)
         {
 
-            var response = await _productService.DeleteImage(publicId);
+            SuccessResponse response = await _productService.DeleteImage(publicId);
             return Ok(response);
         }
-
 
         [HttpGet("all-products", Name = "all-products")]
         [SwaggerOperation(Summary = "get all product")]
@@ -97,10 +88,9 @@ namespace Ecommerce_Api.Controllers
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
         public async Task<IActionResult> GetProducts()
         {
-            var response = await _productService.GetProductsAsync();
+            IEnumerable<Product> response = await _productService.GetProductsAsync();
             return Ok(response);
         }
-
 
         [HttpGet("product", Name = "product")]
         [SwaggerOperation(Summary = "get product")]
@@ -110,7 +100,7 @@ namespace Ecommerce_Api.Controllers
         public async Task<IActionResult> GetProduct(string productId)
         {
 
-            var response = await _productService.GetProductAsync(productId);
+            ProductDto response = await _productService.GetProductAsync(productId);
             return Ok(response);
         }
     }

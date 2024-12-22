@@ -23,7 +23,6 @@ namespace Ecommerce_Api.Controllers
             _userService = userService;
         }
 
-
         [HttpGet("profile", Name = "profile")]
         [SwaggerOperation(Summary = "get loggedin user account ")]
         [SwaggerResponse(StatusCodes.Status200OK, Description = "user", Type = typeof(ProfileResponse))]
@@ -32,11 +31,9 @@ namespace Ecommerce_Api.Controllers
         public async Task<IActionResult> GetUser()
         {
             string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
-            var response = await _userService.Profile(userId);
+            ProfileResponse response = await _userService.Profile(userId);
             return Ok(response);
         }
-
-
 
         [HttpPut("change-password", Name = "change-password")]
         [SwaggerOperation(Summary = "Change user password")]
@@ -46,11 +43,9 @@ namespace Ecommerce_Api.Controllers
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
             string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
-            var response = await _userService.ChangePassword(userId, request);
+            SuccessResponse response = await _userService.ChangePassword(userId, request);
             return Ok(response);
         }
-
-
 
         [HttpDelete("delete-account", Name = "delete-account")]
         [SwaggerOperation(Summary = "delete a user")]
@@ -60,11 +55,9 @@ namespace Ecommerce_Api.Controllers
         public async Task<IActionResult> DeleteUser()
         {
             string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
-            var response = await _userService.DeleteAccount(userId);
+            SuccessResponse response = await _userService.DeleteAccount(userId);
             return Ok(response);
         }
-
-
 
         [HttpPut("update-account", Name = "update-account")]
         [SwaggerOperation(Summary = "update a user")]
@@ -74,11 +67,9 @@ namespace Ecommerce_Api.Controllers
         public async Task<IActionResult> UpdateUser([FromBody] UpdateUserRequest request)
         {
             string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
-            var response = await _userService.UpdateAccount(userId, request);
+            SuccessResponse response = await _userService.UpdateAccount(userId, request);
             return Ok(response);
         }
-
-
 
         [HttpGet("get-cart", Name = "get-cart")]
         [SwaggerOperation(Summary = "get user cart")]
@@ -88,11 +79,9 @@ namespace Ecommerce_Api.Controllers
         public async Task<IActionResult> GetCart()
         {
             string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
-            var response = await _userService.GetCart(userId);
+            Cart response = await _userService.GetCart(userId);
             return Ok(response);
         }
-
-
 
         [HttpPost("add-to-cart", Name = "add-to-cart")]
         [SwaggerOperation(Summary = "add item to user cart")]
@@ -102,11 +91,9 @@ namespace Ecommerce_Api.Controllers
         public async Task<IActionResult> AddToCart([FromBody] AddToCartRequest request)
         {
             string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
-            var response = await _userService.AddToCart(userId, request);
+            CartItemResponse response = await _userService.AddToCart(userId, request);
             return Ok(response);
         }
-
-
 
         [HttpDelete("delete-from-cart", Name = "delete-from-cart")]
         [SwaggerOperation(Summary = "delete an item from user cart")]
@@ -117,10 +104,9 @@ namespace Ecommerce_Api.Controllers
         public async Task<IActionResult> DeleteFromCart(string cartitemId)
         {
             string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
-            var response = await _userService.DeleteFromCart("994f5f3d-f22b-407e-8016-ee7ed508da4e", cartitemId);
+            SuccessResponse response = await _userService.DeleteFromCart(userId, cartitemId);
             return Ok(response);
         }
-
 
         [HttpDelete("delete-cartitems", Name = "delete-cartitems")]
         [SwaggerOperation(Summary = "delete all user cart items")]
@@ -130,7 +116,7 @@ namespace Ecommerce_Api.Controllers
         public async Task<IActionResult> DeleteCartItems()
         {
             string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
-            var response = await _userService.DeleteCartItems(userId);
+            SuccessResponse response = await _userService.DeleteCartItems(userId);
             return Ok(response);
         }
     }

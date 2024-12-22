@@ -23,7 +23,6 @@ namespace Ecommerce_Api.Controllers
             _httpContextAccessor = httpContextAccessor;
         }
 
-
         [HttpPost("flutterwavepayment", Name = "flutterwavepayment")]
         [SwaggerOperation(Summary = "flutterwave payment system")]
         [SwaggerResponse(StatusCodes.Status200OK, Description = "Transaction Details", Type = typeof(FlutterTransactionResponse))]
@@ -32,15 +31,13 @@ namespace Ecommerce_Api.Controllers
         public async Task<IActionResult> FlutterwavePayment([FromForm] FlutterPaymentRequest request)
         {
             string? userId = _httpContextAccessor?.HttpContext?.User?.GetUserId();
-            var response = await _flutterwavePaymentService.FlutterPayment(userId, request);
+            FlutterTransactionResponse response = await _flutterwavePaymentService.FlutterPayment(userId, request);
             if (response.Status == "successful")
                 return RedirectToAction(nameof(VerifyFlutterPayment));
 
             return BadRequest(response);
 
         }
-
-
     
         [HttpGet("verifyflutterwavepayment", Name = "verifyflutterwavepayment")]
         [SwaggerOperation(Summary = "verify flutterwave payment system")]
@@ -49,7 +46,7 @@ namespace Ecommerce_Api.Controllers
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "Transaction Details", Type = typeof(TransactionResponse))]
         public async Task<IActionResult> VerifyFlutterPayment([FromQuery] string transaction_id)
         {
-            var response = await _flutterwavePaymentService.VerifyFlutterPayment(transaction_id);
+            FlutterTransactionResponse response = await _flutterwavePaymentService.VerifyFlutterPayment(transaction_id);
             return Ok(response);
         }
     }
