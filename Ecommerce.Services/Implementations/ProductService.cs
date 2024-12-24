@@ -103,7 +103,10 @@ namespace Ecommerce.Services.Implementations
             if (!allvar.Any())
                 throw new InvalidOperationException("None Found");
 
-            Cloudinary cloudinary = new(new Account(_settings.CloudinarySettings.CloudName, _settings.CloudinarySettings.ApiKey, _settings.CloudinarySettings.ApiSecret));
+            Cloudinary cloudinary = new(
+                    new Account(_settings.CloudinarySettings.CloudName,
+                            _settings.CloudinarySettings.ApiKey,
+                            _settings.CloudinarySettings.ApiSecret));
 
             var deletionParamsList = allvar.SelectMany(item => item.ProductImages.Select(image => new DeletionParams(image.PublicId))).ToList();
             await Task.WhenAll(deletionParamsList.Select(param => cloudinary.DestroyAsync(param)));
@@ -133,7 +136,11 @@ namespace Ecommerce.Services.Implementations
             if (files == null || !files.Any())
                 throw new InvalidOperationException("File cannot be empty");
 
-            Cloudinary cloudinary = new(new Account(_settings.CloudinarySettings.CloudName, _settings.CloudinarySettings.ApiKey, _settings.CloudinarySettings.ApiSecret));
+            Cloudinary cloudinary = new(
+                    new Account(_settings.CloudinarySettings.CloudName,
+                            _settings.CloudinarySettings.ApiKey,
+                            _settings.CloudinarySettings.ApiSecret));
+
             if (cloudinary == null)
                 throw new InvalidOperationException("Invalid Cloud parameters");
 
@@ -229,7 +236,10 @@ namespace Ecommerce.Services.Implementations
                 throw new InvalidOperationException("Image does not exist");
 
             var param = new DeletionParams(image.PublicId) { }; 
-            Cloudinary cloudinary = new(new Account(_settings.CloudinarySettings.CloudName, _settings.CloudinarySettings.ApiKey, _settings.CloudinarySettings.ApiSecret));
+            Cloudinary cloudinary = new(
+                    new Account(_settings.CloudinarySettings.CloudName, 
+                            _settings.CloudinarySettings.ApiKey, 
+                            _settings.CloudinarySettings.ApiSecret));
 
             await cloudinary.DestroyAsync(param);
             await _productImagesRepo.DeleteAsync(image);
@@ -279,8 +289,8 @@ namespace Ecommerce.Services.Implementations
                 Price = variation.Price,
                 StockQuantity = variation.StockQuantity,
                 Colour = variation.Colour.GetStringValue(),
-                ImageUrl = variation.ProductImages.First().Url,
-                ImageSecureUrl = variation.ProductImages.First().SecureUrl
+                ImageUrl = variation.ProductImages.FirstOrDefault().Url,
+                ImageSecureUrl = variation.ProductImages.FirstOrDefault().SecureUrl
             };
         }
 
