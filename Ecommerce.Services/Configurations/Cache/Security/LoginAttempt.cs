@@ -31,7 +31,7 @@ namespace Ecommerce.Services.Configurations.Cache.Security
         public async Task<AttemptDto> CheckLoginAttemptAsync(string userId)
         {
             string cacheKey = CacheKeySelector.AccountLockoutCacheKey(userId);
-            var numberofattempts = await _cacheService.ReadFromCache<AttemptDto>(cacheKey);
+            AttemptDto numberofattempts = await _cacheService.ReadFromCache<AttemptDto>(cacheKey);
 
             return numberofattempts;
         }
@@ -39,7 +39,6 @@ namespace Ecommerce.Services.Configurations.Cache.Security
 
         public async Task ResetLoginAttemptAsync(string userId)
         {
-            var attempt = 0;
             string cacheKey = CacheKeySelector.AccountLockoutCacheKey(userId);
             await _cacheService.ClearFromCache(cacheKey);
         }

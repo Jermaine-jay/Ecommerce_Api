@@ -1,4 +1,5 @@
 using Ecommerce.Data.Seeds;
+using Ecommerce.Services.Extensions;
 using Ecommerce_Api.Extensions;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +9,7 @@ using TaskManager.Data.Seeds;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+IConfiguration configuration = builder.Configuration;
 string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.RegisterDbContext(connectionString);
 builder.Services.RegisterServices();
@@ -30,10 +31,11 @@ builder.Services.AddCors(opt =>
 
 builder.Services.ConfigureJWT(builder.Configuration);
 builder.Services.AddRedisCache(builder.Configuration);
+builder.Services.BindConfigurations(configuration);
 
-builder.Services.AddAuthentication()
+builder.Services.AddAuthentication();
 
-.AddGoogle(options =>
+/*.AddGoogle(options =>
 {
     options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
     options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
@@ -43,7 +45,7 @@ builder.Services.AddAuthentication()
 {
     facebookOptions.AppId = builder.Configuration["Authentication:Facebook:AppId"];
     facebookOptions.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
-});
+});*/
 
 builder.Services.AddMvc();
 
@@ -122,9 +124,9 @@ app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 app.MapControllers();
 
 
-await app.SeedRole();
+/*await app.SeedRole();
 await app.ClaimSeeder();
 await app.ProductSeeder();
-await app.SeededUserAsync();
+await app.SeededUserAsync();*/
 
 app.Run();

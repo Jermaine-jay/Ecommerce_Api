@@ -40,7 +40,6 @@ namespace Ecommerce_Api.Controllers
             return Ok(response);
         }
 
-
         [AllowAnonymous]
         [HttpPost("LoginWithFacebook", Name = "LoginWithFacebook")]
         [SwaggerOperation(Summary = "Authenticates a user with facebook")]
@@ -58,13 +57,13 @@ namespace Ecommerce_Api.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("LoginWithGoogle")]
+        [HttpPost("LoginWithGoogle", Name = "LoginWithGoogle")]
         [SwaggerOperation(Summary = "Authenticates a user with google")]
         [SwaggerResponse(StatusCodes.Status200OK, Description = "user token", Type = typeof(AuthenticationResponse))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "No info", Type = typeof(ErrorResponse))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Invalid external authentication", Type = typeof(ErrorResponse))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "Internal error", Type = typeof(ErrorResponse))]
-        public async Task<IActionResult> GoogleAuth([FromBody] string accessToken)
+        public async Task<IActionResult> GoogleAuth(string accessToken)
         {
             AuthenticationResponse response = await _authServices.GoogleAuth(accessToken);
             if (!response.IsExisting)
@@ -110,7 +109,6 @@ namespace Ecommerce_Api.Controllers
             ResetPasswordResponse response = await _authServices.ForgotPassword(request);
             return Ok(response);
         }
-
 
         [AllowAnonymous]
         [HttpPut("reset-password", Name = "reset-password")]

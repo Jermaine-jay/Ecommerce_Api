@@ -49,10 +49,10 @@ namespace Ecommerce.Services.Implementations
                     break;
             }
 
-            var CallbackUrl = "https://Localhost:7085/api/Flutterwave/verifyflutterwavepayment";
             var PaymentTitle = "Ecommerce Payment";
-            var PaymentDescription = $"Payment for {order.OrderItems.Count()} bought on Ecommerce website";
             var reference = Guid.NewGuid().ToString();
+            var CallbackUrl = "https://Localhost:7085/api/Flutterwave/verifyflutterwavepayment";
+            var PaymentDescription = $"Payment for {order.OrderItems.Count()} bought on Ecommerce website";
             var address = $"{order.ShippingAddress.HomeNumber} {order.ShippingAddress.Street} {order.ShippingAddress.City}";
 
             var result = flutter.Payments.InitiatePayment(reference, order.Total/10, CallbackUrl,
@@ -71,7 +71,6 @@ namespace Ecommerce.Services.Implementations
 
             return response;
         }
-
 
         public async Task<FlutterTransactionResponse> VerifyFlutterPayment(string transaction_id)
         {
@@ -98,7 +97,6 @@ namespace Ecommerce.Services.Implementations
 
             return response;
         }
-
 
         public async Task<bool> IsServiceUpAsync()
         {
