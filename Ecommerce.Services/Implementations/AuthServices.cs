@@ -54,7 +54,8 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<AuthenticationResponse> GoogleAuth(string credential)
         {
-            
+            if (credential == null) throw new ArgumentNullException("Token is null or invalid");
+
             var settings = new GoogleJsonWebSignature.ValidationSettings()
             {
                 Audience = new List<string>() { _configuration["Authentication:Google:ClientId"] }
@@ -139,6 +140,8 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<AuthenticationResponse> FaceBookAuth(string credential)
         {
+            if (credential == null) throw new ArgumentNullException("Token is null or invalid");
+
             var debugTokenResponse = await _httpClient.GetAsync("https://graph.facebook.com/debug_token?input_token=" + credential + $"&access_token={_configuration["Authentication:Facebook:AppId"]}|{_configuration["Authentication:Facebook:AppSecret"]}");
 
             var stringThing = await debugTokenResponse.Content.ReadAsStringAsync();
