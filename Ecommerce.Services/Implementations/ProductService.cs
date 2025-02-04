@@ -10,8 +10,6 @@ using Ecommerce.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 using System.Net;
 
 namespace Ecommerce.Services.Implementations
@@ -45,7 +43,6 @@ namespace Ecommerce.Services.Implementations
             if (product != null)
                 throw new InvalidOperationException("Product Name already exist");
 
-
             var newProduct = new Product
             {
                 Name = request.Name.ToLower(),
@@ -68,7 +65,7 @@ namespace Ecommerce.Services.Implementations
             if (product == null)
                 throw new InvalidOperationException("Product does not exist");
 
-            if (!request.CategoryName.IsNullOrEmpty() && request.CategoryName != "string")
+            if (request.CategoryName != null && request.CategoryName != "string")
             {
                 var category = await _categoryRepo.GetSingleByAsync(p => p.Name == request.CategoryName.ToLower());
                 if (category == null)
@@ -144,7 +141,7 @@ namespace Ecommerce.Services.Implementations
             if (cloudinary == null)
                 throw new InvalidOperationException("Invalid Cloud parameters");
 
-            var uploadResults = new List<ImageUploadResult>();
+            List<ImageUploadResult> uploadResults = new List<ImageUploadResult>();
             foreach (var file in files)
             {
                 if (file.Length <= 0)
@@ -220,7 +217,7 @@ namespace Ecommerce.Services.Implementations
             await _productVariationRepo.AddAsync(newVar);
             if (request.files != null)
             {
-                var images = await AddImages(newVar.Id, request.files);
+                object images = await AddImages(newVar.Id, request.files);
             }
             return new SuccessResponse
             {
@@ -235,10 +232,10 @@ namespace Ecommerce.Services.Implementations
             if (image != null)
                 throw new InvalidOperationException("Image does not exist");
 
-            var param = new DeletionParams(image.PublicId) { }; 
+            var param = new DeletionParams(image.PublicId) { };
             Cloudinary cloudinary = new(
-                    new Account(_settings.CloudinarySettings.CloudName, 
-                            _settings.CloudinarySettings.ApiKey, 
+                    new Account(_settings.CloudinarySettings.CloudName,
+                            _settings.CloudinarySettings.ApiKey,
                             _settings.CloudinarySettings.ApiSecret));
 
             await cloudinary.DestroyAsync(param);
