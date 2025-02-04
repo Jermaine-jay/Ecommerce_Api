@@ -1,16 +1,11 @@
-﻿using CloudinaryDotNet;
-using Ecommerce.Services.Configurations.Cache.CacheServices;
+﻿using Ecommerce.Services.Configurations.Cache.CacheServices;
 using Ecommerce.Services.Configurations.Email;
 using Ecommerce.Services.Configurations.Jwt;
 using Ecommerce.Services.Infrastructure;
 using Flutterwave.Net.Utilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using AppConstants = Ecommerce.Services.Infrastructure.AppConstants;
 
 namespace Ecommerce.Services.Extensions
 {
@@ -20,6 +15,7 @@ namespace Ecommerce.Services.Extensions
         {
             JwtConfig jwt = new();
             RedisConfig redisConfig = new();
+            AppConstants appConstants = new();
             GoogleConfig googleConfig = new();
             FacebookConfig facebookConfig = new();
             ZeroBounceConfig zeroBounceConfig = new();
@@ -28,6 +24,7 @@ namespace Ecommerce.Services.Extensions
 
             configuration.GetSection("JwtConfig").Bind(jwt);
             configuration.GetSection("RedisConfig").Bind(redisConfig);
+            configuration.GetSection("AppConstants").Bind(appConstants);
             configuration.GetSection("EmailSenderOptions").Bind(emailSenderOptions);
             configuration.GetSection("ZeroBounceConfig").Bind(zeroBounceConfig);
             configuration.GetSection("GoogleConfig").Bind(googleConfig);
@@ -36,6 +33,7 @@ namespace Ecommerce.Services.Extensions
 
             services.AddSingleton(jwt);
             services.AddSingleton(redisConfig);
+            services.AddSingleton(appConstants);
             services.AddSingleton(emailSenderOptions);
             services.AddSingleton(googleConfig);
             services.AddSingleton(facebookConfig);
