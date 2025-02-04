@@ -17,6 +17,7 @@
     <PackageReference Include="MimeKit" Version="4.3.0" />
     <PackageReference Include="Paystack.Net" Version="1.1.0" />
     <PackageReference Include="Rave.NET" Version="1.0.3" />
+    <PackageReference Include="SocialAuthentication.NET" Version="1.0.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.6.122" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.0" />
   </ItemGroup>
