@@ -25,8 +25,6 @@ namespace Ecommerce.Services.Configurations.Cache.CacheServices
             
         }
 
-
-
         public async Task<T?> ReadFromCache<T>(string key) where T : class
         {
             string? serialisedPayload = await _redis.StringGetAsync(key: key);
@@ -38,20 +36,16 @@ namespace Ecommerce.Services.Configurations.Cache.CacheServices
             return default;
         }
 
-
         public async Task ClearFromCache(string key)
         {
             await _redis.KeyDeleteAsync(key);
         }
-
 
         public async Task ClearFromCache(CacheKeySets cacheKeySets, string key)
         {
             await _redis.KeyDeleteAsync(key);
             await _redis.SetRemoveAsync(cacheKeySets.ToString(), key);
         }
-
-
 
         public async Task<IEnumerable<T>> BulkReadFromCache<T>(string pattern) where T : class
         {
@@ -66,8 +60,6 @@ namespace Ecommerce.Services.Configurations.Cache.CacheServices
             }
             return records;
         }
-
-
 
         public async Task<IEnumerable<T>> BulkReadFromCache<T>(CacheKeySets cacheKeySets) where T : class
         {
