@@ -49,7 +49,6 @@ namespace Ecommerce.Services.Implementations
             return true;
         }
 
-
         public async Task<string> ResetPasswordMail(ApplicationUser user)
         {
             var validToken = await _otpService.GenerateUniqueOtpAsync(user.Id.ToString(), OtpOperation.PasswordReset);

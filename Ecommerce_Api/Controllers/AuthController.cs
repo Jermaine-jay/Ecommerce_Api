@@ -72,6 +72,22 @@ namespace Ecommerce_Api.Controllers
             return Ok(response);
         }
 
+        [AllowAnonymous]
+        [HttpPost("LoginWithMicrosoft", Name = "LoginWithMicrosoft")]
+        [SwaggerOperation(Summary = "Authenticates a user with microsoft")]
+        [SwaggerResponse(StatusCodes.Status200OK, Description = "user token", Type = typeof(AuthenticationResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "No info", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, Description = "Invalid external authentication", Type = typeof(ErrorResponse))]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "Internal error", Type = typeof(ErrorResponse))]
+        public async Task<IActionResult> MicrosoftAuth(string accessToken)
+        {
+            AuthenticationResponse response = await _authServices.MicrosoftAuth(accessToken);
+            if (!response.IsExisting)
+                return RedirectToAction(nameof(ChangePassword));
+
+            return Ok(response);
+        }
+
         [HttpPost("change-password")]
         [SwaggerOperation(Summary = "Change user password")]
         [SwaggerResponse(StatusCodes.Status200OK, Description = "user token", Type = typeof(SuccessResponse))]

@@ -17,4 +17,10 @@
         public string ClientId { get; set; }
         public string ClientSecret { get; set; }
     }
+
+    public class MicrosoftConfig
+    {
+        public string Audience { get; set; }
+        public string Tenanat { get; set; }
+    }
 }

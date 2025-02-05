@@ -12,6 +12,7 @@ using Ecommerce.Services.Utilities;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
+using SocialAuthentication.NET.OpenID;
 using AppConstants = Ecommerce.Services.Infrastructure.AppConstants;
 
 
@@ -31,18 +32,20 @@ namespace Ecommerce.Services.Implementations
         private readonly IJwtAuthenticator _jwtAuthenticator;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly MicrosoftConfig _microsoftConfig;
 
-        public AuthServices(UserManager<ApplicationUser> userManager,
+        public AuthServices(UserManager<ApplicationUser> userManager, MicrosoftConfig microsoftConfig,
             RoleManager<ApplicationRole> roleManager, HttpClient httpClient, AppConstants appConstants,
             FacebookConfig facebookConfig, GoogleConfig googleConfig, IServiceFactory serviceFactory)
         {
-            _serviceFactory = serviceFactory;
+            _httpClient = httpClient;
             _userManager = userManager;
             _roleManager = roleManager;
-            _httpClient = httpClient;
             _appConstants = appConstants;
-            _facebookConfig = facebookConfig;
             _googleConfig = googleConfig;
+            _facebookConfig = facebookConfig;
+            _serviceFactory = serviceFactory;
+            _microsoftConfig = microsoftConfig;
             _otpService = _serviceFactory.GetService<IOtpService>();
             _cacheService = _serviceFactory.GetService<ICacheService>();
             _loginAttempt = _serviceFactory.GetService<ILoginAttempt>();
@@ -239,6 +242,96 @@ namespace Ecommerce.Services.Implementations
                 IsExisting = true
             };
         }
+
+        public async Task<AuthenticationResponse> MicrosoftAuth(string credential)
+        {
+            if (credential == null) throw new ArgumentNullException("Token is null or invalid");
+
+            OpenIdConfiguration microsoftUser = new(credential);
+            string microsoftUserDetails = microsoftUser.microsoftIdConfiguration
+                                    .ValidateMicrosoftToken(_microsoftConfig.Audience, _microsoftConfig.Tenanat);
+
+            if (microsoftUserDetails == null)
+                throw new InvalidOperationException($"Invalid External Authentication.");
+
+            MicrosoftPayload? payload = JsonConvert.DeserializeObject<MicrosoftPayload>(microsoftUserDetails);
+
+            //if userlogin already exist, dont save
+            UserLoginInfo info = new UserLoginInfo("Microsoft", payload.ObjectId, "Microsoft");
+            if (info == null)
+                throw new InvalidOperationException($"NO INFO");
+
+            ApplicationUser? user = await _userManager.FindByEmailAsync(payload.Username);
+            if (user == null)
+            {
+                string[] name = payload.Name.Split(' ');
+                ApplicationUser newuser = new ApplicationUser
+                {
+                    Id = Guid.NewGuid(),
+                    Email = payload.Username,
+                    UserName = payload.Username,
+                    FirstName = name[0],
+                    LastName = name[1],
+                    Active = true,
+                    UserType = UserType.User,
+                };
+
+                newuser.EmailConfirmed = true;
+
+                IdentityResult result = await _userManager.CreateAsync(newuser);
+                if (!result.Succeeded)
+                {
+                    string message = $"Failed to create user: {(result.Errors.FirstOrDefault())?.Description}";
+                    throw new InvalidOperationException(message);
+                }
+
+                Cart cart = new Cart();
+                var key = $"cart:{newuser.Id}";
+
+                await _cacheService.WriteToCache(key, cart, null, TimeSpan.FromDays(365));
+
+                string role = UserType.User.GetStringValue();
+                bool roleExists = await _roleManager.RoleExistsAsync(role);
+
+                if (!roleExists)
+                {
+                    ApplicationRole newRole = new ApplicationRole { Name = role };
+                    await _roleManager.CreateAsync(newRole);
+                }
+
+                await _userManager.AddToRoleAsync(newuser, role);
+                await _userManager.AddLoginAsync(newuser, info);
+
+                JwtToken jwttoken = await _jwtAuthenticator.GenerateJwtToken(newuser);
+                string newUserFullname = $"{newuser.LastName} {newuser.FirstName}";
+
+                return new AuthenticationResponse
+                {
+                    JwtToken = jwttoken,
+                    UserType = newuser.UserType.GetStringValue(),
+                    FullName = newUserFullname,
+                    TwoFactor = false,
+                    IsExisting = false,
+                };
+            }
+
+            ApplicationUser? existuser = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+            if (existuser == null)
+                throw new InvalidOperationException($"User Does Not exist");
+
+            JwtToken jwtToken = await _jwtAuthenticator.GenerateJwtToken(user);
+            string fullname = $"{user.LastName} {user.FirstName}";
+
+            return new AuthenticationResponse
+            {
+                JwtToken = jwtToken,
+                UserType = user.UserType.GetStringValue(),
+                FullName = fullname,
+                TwoFactor = false,
+                IsExisting = true
+            };
+        }
+
 
         public async Task<ApplicationUser> RegisterUser(UserRegistrationRequest request)
         {
