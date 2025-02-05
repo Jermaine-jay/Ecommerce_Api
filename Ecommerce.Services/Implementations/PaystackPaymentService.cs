@@ -2,6 +2,7 @@
 using Ecommerce.Models.Dtos.Requests;
 using Ecommerce.Models.Dtos.Responses;
 using Ecommerce.Models.Entities;
+using Ecommerce.Services.Extensions;
 using Ecommerce.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -14,22 +15,23 @@ namespace Ecommerce.Services.Implementations
 {
     public class PaystackPaymentService : IPaystackPaymentService
     {
-        private readonly IConfiguration _configuration;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly string _secret;
         private readonly HttpClient _httpClient;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly PaystackConfig _paystack;
         private readonly IRepository<Order> _orderRepo;
+        private readonly IConfiguration _configuration;
+        private readonly UserManager<ApplicationUser> _userManager;
 
 
-        public PaystackPaymentService(IConfiguration configuration, UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork)
+        public PaystackPaymentService(IConfiguration configuration, IUnitOfWork unitOfWork,
+            UserManager<ApplicationUser> userManager, PaystackConfig paystack)
         {
-            _configuration = configuration;
-            _userManager = userManager;
+            _paystack = paystack;
             _unitOfWork = unitOfWork;
-            _secret = _configuration["Paystack:ApiKey"];
-            _orderRepo = _unitOfWork.GetRepository<Order>();
+            _userManager = userManager;
             _httpClient = new HttpClient();
+            _configuration = configuration;
+            _orderRepo = _unitOfWork.GetRepository<Order>();
         }
 
         public async Task<TransactionResponse> MakePayment(string userId, string orderId)
@@ -52,7 +54,7 @@ namespace Ecommerce.Services.Implementations
                 CallbackUrl = "https://localhost:7076//api/Paystack/verifypaystackpayment",
             };
 
-            PayStackApi payStack = new(_secret);
+            PayStackApi payStack = new(_paystack.ApiKey);
             var result = payStack.Transactions.Initialize(Request);
 
             var response = new TransactionResponse
@@ -75,7 +77,7 @@ namespace Ecommerce.Services.Implementations
                   ?? throw new InvalidOperationException("Not Found");
             var o = order.Where(o => o.Txnref.ToString() == referenceCode).FirstOrDefault();
 
-            PayStackApi payStack = new(_secret);
+            PayStackApi payStack = new(_paystack.ApiKey);
             TransactionVerifyResponse result = payStack.Transactions.Verify(referenceCode);
             if (result.Data.Status == "success")
             {
@@ -104,7 +106,7 @@ namespace Ecommerce.Services.Implementations
             var user = await _userManager.FindByIdAsync(userId)
                 ?? throw new InvalidOperationException($"User not found.");
 
-            PayStackApi payStack = new(_secret);
+            PayStackApi payStack = new(_paystack.ApiKey);
 
             var bankChargeRequest = new BankChargeRequest
             {
@@ -138,7 +140,7 @@ namespace Ecommerce.Services.Implementations
             var order = await _orderRepo.GetSingleByAsync(order => order.Txnref.ToString() == refrence)
               ?? throw new InvalidOperationException($"Order not found.");
 
-            PayStackApi payStack = new(_secret);
+            PayStackApi payStack = new(_paystack.ApiKey);
             var result = payStack.Charge.SubmitOTP(refrence, otp);
             if (result.Status)
             {
@@ -159,7 +161,7 @@ namespace Ecommerce.Services.Implementations
             var user = await _userManager.FindByIdAsync(userId)
                 ?? throw new InvalidOperationException($"User not found.");
 
-            PayStackApi payStack = new PayStackApi(_secret);
+            PayStackApi payStack = new PayStackApi(_paystack.ApiKey);
             var cardChargeRequest = new CardChargeRequest
             {
                 Email = user.Email,
@@ -196,7 +198,7 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<ResolveAccountResponse> GetAccount(string accountnumber, string bankcode)
         {
-            PayStackApi payStack = new(_secret);
+            PayStackApi payStack = new(_paystack.ApiKey);
             var result = payStack.Miscellaneous.ResolveAccountNumber(accountnumber, bankcode);
             var response = new ResolveAccountResponse
             {
@@ -211,7 +213,7 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<List<BankResponse>> ListBank()
         {
-            PayStackApi payStack = new(_secret);
+            PayStackApi payStack = new(_paystack.ApiKey);
             var result = payStack.Miscellaneous.ListBanks();
             var response = result.Data.Select(u => new BankResponse
             {
@@ -227,7 +229,7 @@ namespace Ecommerce.Services.Implementations
             _httpClient.BaseAddress = new Uri("https://api.paystack.co/");
             var response = await _httpClient.GetAsync("/healthcheck");
 
-            PayStackApi payStack = new(_secret);
+            PayStackApi payStack = new(_paystack.ApiKey);
             return response.IsSuccessStatusCode;
         }
     }

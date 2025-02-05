@@ -1,9 +1,8 @@
 ﻿using Ecommerce.Services.Configurations.Cache.CacheServices;
-using Ecommerce.Services.Configurations.Cache.Otp;
 
 namespace Ecommerce.Services.Configurations.Cache.Security
 {
-    public class LoginAttempt:ILoginAttempt
+    public class LoginAttempt : ILoginAttempt
     {
         private readonly ICacheService _cacheService;
 
@@ -12,7 +11,6 @@ namespace Ecommerce.Services.Configurations.Cache.Security
         {
             _cacheService = cacheService;
         }
-
 
         public async Task<string> LoginAttemptAsync(string userId)
         {
@@ -31,11 +29,10 @@ namespace Ecommerce.Services.Configurations.Cache.Security
         public async Task<AttemptDto> CheckLoginAttemptAsync(string userId)
         {
             string cacheKey = CacheKeySelector.AccountLockoutCacheKey(userId);
-            AttemptDto numberofattempts = await _cacheService.ReadFromCache<AttemptDto>(cacheKey);
+            AttemptDto? numberofattempts = await _cacheService.ReadFromCache<AttemptDto>(cacheKey);
 
             return numberofattempts;
         }
-
 
         public async Task ResetLoginAttemptAsync(string userId)
         {

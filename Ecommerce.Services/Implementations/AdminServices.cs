@@ -16,7 +16,6 @@ namespace Ecommerce.Services.Implementations
         private readonly IRepository<Category> _categoryRepo;
         private readonly IUnitOfWork _unitOfWork;
 
-
         public AdminService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager)
         {
             _unitOfWork = unitOfWork;
@@ -24,7 +23,6 @@ namespace Ecommerce.Services.Implementations
             _categoryRepo = _unitOfWork.GetRepository<Category>();
             _userRepo = _unitOfWork.GetRepository<ApplicationUser>();
         }
-
 
         public async Task<CreateCategoryResponse> CreateCategory(CreateCategoryRequest request)
         {
@@ -63,7 +61,6 @@ namespace Ecommerce.Services.Implementations
             };
         }
 
-
         public async Task<SuccessResponse> GetAllCategories()
         {
             var categories = await _categoryRepo.GetAllAsync()
@@ -75,7 +72,6 @@ namespace Ecommerce.Services.Implementations
                 Data = categories
             };
         }
-
 
         public async Task<SuccessResponse> GetUsers()
         {
@@ -103,7 +99,6 @@ namespace Ecommerce.Services.Implementations
             };
         }
 
-
         public async Task<ApplicationUserDto> GetUser(string userId)
         {
             var user = await _userRepo.GetSingleByAsync(user => user.Id.ToString() == userId);
@@ -124,7 +119,6 @@ namespace Ecommerce.Services.Implementations
             };
         }
 
-
         public async Task<SuccessResponse> DeleteUser(string userId)
         {
             var user = await _userRepo.GetSingleByAsync(user => user.Id.ToString() == userId);
@@ -137,7 +131,6 @@ namespace Ecommerce.Services.Implementations
                 Success = true
             };
         }
-
 
         public async Task<SuccessResponse> LockUser(LockUserRequest request)
         {

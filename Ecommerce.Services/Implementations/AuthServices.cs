@@ -152,7 +152,8 @@ namespace Ecommerce.Services.Implementations
 
             string appId = _facebookConfig.AppId;
             string appSecret = _facebookConfig.AppSecret;
-            HttpResponseMessage debugTokenResponse = await _httpClient.GetAsync("https://graph.facebook.com/debug_token?input_token=" + credential + $"&access_token={appId}|{appSecret}");
+            HttpResponseMessage debugTokenResponse = await _httpClient.GetAsync("https://graph.facebook.com/debug_token?input_token=" 
+                                                                                + credential + $"&access_token={appId}|{appSecret}");
 
             string stringThing = await debugTokenResponse.Content.ReadAsStringAsync();
 
@@ -197,11 +198,11 @@ namespace Ecommerce.Services.Implementations
                 }
 
                 Cart cart = new Cart();
-                var key = $"cart:{newuser.Id}";
+                string? key = $"cart:{newuser.Id}";
 
                 await _cacheService.WriteToCache(key, cart, null, TimeSpan.FromDays(365));
 
-                string role = UserType.User.GetStringValue();
+                string? role = UserType.User.GetStringValue();
                 bool roleExists = await _roleManager.RoleExistsAsync(role);
 
                 if (!roleExists)
@@ -433,7 +434,6 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<SuccessResponse> ChangePassword(string userId, ChangePasswordRequest request)
         {
-
             ApplicationUser? user = await _userManager.FindByIdAsync(userId);
             if (user == null)
                 throw new InvalidOperationException("User Not Found");
@@ -495,5 +495,4 @@ namespace Ecommerce.Services.Implementations
             };
         }
     }
-
 }

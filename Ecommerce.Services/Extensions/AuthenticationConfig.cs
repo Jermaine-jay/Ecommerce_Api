@@ -23,4 +23,14 @@
         public string Audience { get; set; }
         public string Tenanat { get; set; }
     }
+
+    public class FlutterwaveConfig
+    {
+        public string ApiKey { get; set; }
+    }
+
+    public class PaystackConfig
+    {
+        public string ApiKey { get; set; }
+    }
 }

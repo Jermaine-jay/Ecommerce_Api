@@ -3,6 +3,7 @@ using Ecommerce.Models.Dtos.Requests;
 using Ecommerce.Models.Dtos.Responses;
 using Ecommerce.Models.Entities;
 using Ecommerce.Models.Enums;
+using Ecommerce.Services.Extensions;
 using Ecommerce.Services.Interfaces;
 using Flutterwave.Net;
 using Microsoft.AspNetCore.Identity;
@@ -19,14 +20,15 @@ namespace Ecommerce.Services.Implementations
         private readonly IRepository<Order> _orderRepo;
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly string _Apikey;
+        private readonly FlutterwaveConfig _flutterwave;
 
-        public FlutterwavePaymentService(IUnitOfWork unitOfWork, IConfiguration configuration, IOrderService orderService, UserManager<ApplicationUser> userManager)
+        public FlutterwavePaymentService(IUnitOfWork unitOfWork, IConfiguration configuration, 
+            IOrderService orderService, UserManager<ApplicationUser> userManager, FlutterwaveConfig flutterwave)
         {
             _unitOfWork = unitOfWork;
             _httpClient = new HttpClient();
             _configuration = configuration;
-            _Apikey = _configuration["Flutterwave:ApiKey"];
+            _flutterwave = flutterwave;
             _orderRepo = _unitOfWork.GetRepository<Order>();
             _userManager = userManager;
         }
@@ -40,7 +42,7 @@ namespace Ecommerce.Services.Implementations
             var user = await _userManager.FindByIdAsync(userId)
                 ?? throw new InvalidOperationException($"User not found.");
 
-            var flutter = new FlutterwaveApi(_Apikey);
+            var flutter = new FlutterwaveApi(_flutterwave.ApiKey);
             var currency = Flutterwave.Net.Currency.NigerianNaira;
             switch (request.Currency)
             {
@@ -74,8 +76,7 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<FlutterTransactionResponse> VerifyFlutterPayment(string transaction_id)
         {
-
-            var say = new FlutterwaveApi(_Apikey);
+            var say = new FlutterwaveApi(_flutterwave.ApiKey);
             var result = say.Transactions.VerifyTransaction(int.Parse(transaction_id));
 
             var order = await _orderRepo.GetSingleByAsync(order => order.Id.Equals(result.Data.TxRef))
@@ -100,7 +101,7 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<bool> IsServiceUpAsync()
         {
-            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_Apikey}");
+            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_flutterwave.ApiKey}");
 
             var response = await _httpClient.GetAsync("https://api.flutterwave.com/v3//ping");
             return response.IsSuccessStatusCode;
