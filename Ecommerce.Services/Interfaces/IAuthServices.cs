@@ -14,5 +14,6 @@ namespace Ecommerce.Services.Interfaces
         Task<SuccessResponse> ChangePassword(string userId, ChangePasswordRequest request);
         Task<SuccessResponse> ResetPassword(ResetPasswordRequest request);
         Task<ResetPasswordResponse> ForgotPassword(ForgotPasswordRequest request);
+        Task<AuthenticationResponse> MicrosoftAuth(string credential);
     }
 }
