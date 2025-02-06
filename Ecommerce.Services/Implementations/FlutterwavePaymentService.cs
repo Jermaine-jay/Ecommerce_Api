@@ -9,26 +9,28 @@ using Flutterwave.Net;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
+using AppConstants = Ecommerce.Services.Infrastructure.AppConstants;
 
 namespace Ecommerce.Services.Implementations
 {
     public class FlutterwavePaymentService : IFlutterwavePaymentService
     {
-        private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
-        private readonly IRepository<Order> _orderRepo;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IRepository<Order> _orderRepo;
+        private readonly IConfiguration _configuration;
         private readonly FlutterwaveConfig _flutterwave;
+        private readonly AppConstants _appConstants;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public FlutterwavePaymentService(IUnitOfWork unitOfWork, IConfiguration configuration, 
-            IOrderService orderService, UserManager<ApplicationUser> userManager, FlutterwaveConfig flutterwave)
+        public FlutterwavePaymentService(IUnitOfWork unitOfWork, IConfiguration configuration, IOrderService orderService,
+            UserManager<ApplicationUser> userManager, FlutterwaveConfig flutterwave, AppConstants appConstants)
         {
             _unitOfWork = unitOfWork;
             _httpClient = new HttpClient();
             _configuration = configuration;
             _flutterwave = flutterwave;
+            _appConstants = appConstants;
             _orderRepo = _unitOfWork.GetRepository<Order>();
             _userManager = userManager;
         }
@@ -36,14 +38,14 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<FlutterTransactionResponse> FlutterPayment(string userId, FlutterPaymentRequest request)
         {
-            var order = await _orderRepo.GetSingleByAsync(order => order.Id.ToString() == request.OrderId, include: u=> u.Include(u=>u.OrderItems))
+            Order order = await _orderRepo.GetSingleByAsync(order => order.Id.ToString() == request.OrderId, include: u => u.Include(u => u.OrderItems))
                 ?? throw new InvalidOperationException($"Order not found.");
 
-            var user = await _userManager.FindByIdAsync(userId)
+            ApplicationUser user = await _userManager.FindByIdAsync(userId)
                 ?? throw new InvalidOperationException($"User not found.");
 
-            var flutter = new FlutterwaveApi(_flutterwave.ApiKey);
-            var currency = Flutterwave.Net.Currency.NigerianNaira;
+            FlutterwaveApi flutter = new FlutterwaveApi(_flutterwave.ApiKey);
+            Currency currency = Flutterwave.Net.Currency.NigerianNaira;
             switch (request.Currency)
             {
                 case (int)CountryCurrency.NigerianNaira:
@@ -51,16 +53,14 @@ namespace Ecommerce.Services.Implementations
                     break;
             }
 
-            var PaymentTitle = "Ecommerce Payment";
-            var reference = Guid.NewGuid().ToString();
-            var CallbackUrl = "https://Localhost:7085/api/Flutterwave/verifyflutterwavepayment";
-            var PaymentDescription = $"Payment for {order.OrderItems.Count()} bought on Ecommerce website";
-            var address = $"{order.ShippingAddress.HomeNumber} {order.ShippingAddress.Street} {order.ShippingAddress.City}";
+            string reference = Guid.NewGuid().ToString();
+            string PaymentDescription = $"Payment for {order.OrderItems.Count()} bought on Ecommerce website";
+            string address = $"{order.ShippingAddress.HomeNumber} {order.ShippingAddress.Street} {order.ShippingAddress.City}";
 
-            var result = flutter.Payments.InitiatePayment(reference, order.Total/10, CallbackUrl,
-                order.UserName, user.Email, address, PaymentTitle, PaymentDescription, currency.ToString());
+            InitiatePaymentResponse result = flutter.Payments.InitiatePayment(reference, order.Total / 10, _appConstants.CallbackUrl,
+                order.UserName, user.Email, address, _appConstants.PaymentTitle, PaymentDescription, currency.ToString());
 
-            var response = new FlutterTransactionResponse
+            FlutterTransactionResponse response = new()
             {
                 Message = result.Message,
                 Status = result.Status,
@@ -76,10 +76,10 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<FlutterTransactionResponse> VerifyFlutterPayment(string transaction_id)
         {
-            var say = new FlutterwaveApi(_flutterwave.ApiKey);
+            FlutterwaveApi say = new FlutterwaveApi(_flutterwave.ApiKey);
             var result = say.Transactions.VerifyTransaction(int.Parse(transaction_id));
 
-            var order = await _orderRepo.GetSingleByAsync(order => order.Id.Equals(result.Data.TxRef))
+            Order order = await _orderRepo.GetSingleByAsync(order => order.Id.Equals(result.Data.TxRef))
                 ?? throw new InvalidOperationException($"Order not found.");
 
             if (result.Status == "successful")
@@ -89,7 +89,7 @@ namespace Ecommerce.Services.Implementations
                 await _orderRepo.UpdateAsync(order);
             }
 
-            var response = new FlutterTransactionResponse
+            FlutterTransactionResponse response = new()
             {
                 Message = result.Message,
                 Status = result.Status,
@@ -103,8 +103,8 @@ namespace Ecommerce.Services.Implementations
         {
             _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_flutterwave.ApiKey}");
 
-            var response = await _httpClient.GetAsync("https://api.flutterwave.com/v3//ping");
+            HttpResponseMessage response = await _httpClient.GetAsync(_appConstants.FlutterPingUrl);
             return response.IsSuccessStatusCode;
         }
-    }  
+    }
 }
