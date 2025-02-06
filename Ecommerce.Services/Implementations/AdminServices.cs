@@ -26,11 +26,11 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<CreateCategoryResponse> CreateCategory(CreateCategoryRequest request)
         {
-            var category = await _categoryRepo.GetSingleByAsync(p => p.Name == request.Name.ToLower());
+            Category category = await _categoryRepo.GetSingleByAsync(p => p.Name == request.Name.ToLower());
             if (category != null)
                 throw new InvalidOperationException("Category Name already exist");
 
-            var newCategory = new Category
+            Category newCategory = new Category
             {
                 Name = request.Name.ToLower(),
             };
@@ -47,7 +47,7 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<SuccessResponse> UpdateCategory(string CategoryId, string name)
         {
-            var category = await _categoryRepo.GetSingleByAsync(u => u.Id.ToString() == CategoryId) ??
+            Category category = await _categoryRepo.GetSingleByAsync(u => u.Id.ToString() == CategoryId) ??
                 throw new InvalidOperationException("Category does not exist");
 
             category.Name = name.ToLower();
@@ -63,7 +63,7 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<SuccessResponse> GetAllCategories()
         {
-            var categories = await _categoryRepo.GetAllAsync()
+            IEnumerable<Category> categories = await _categoryRepo.GetAllAsync()
                 ?? throw new InvalidOperationException("No Category Found");
 
             return new SuccessResponse
@@ -75,11 +75,11 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<SuccessResponse> GetUsers()
         {
-            var users = await _userRepo.GetAllAsync();
+            IEnumerable<ApplicationUser> users = await _userRepo.GetAllAsync();
             if (users == null)
                 throw new InvalidOperationException("Users Not Found");
 
-            var result = users.Select(user => new ApplicationUserDto
+            IEnumerable<ApplicationUserDto> result = users.Select(user => new ApplicationUserDto
             {
                 FirstName = user.FirstName,
                 LastName = user.LastName,
@@ -101,7 +101,7 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<ApplicationUserDto> GetUser(string userId)
         {
-            var user = await _userRepo.GetSingleByAsync(user => user.Id.ToString() == userId);
+            ApplicationUser user = await _userRepo.GetSingleByAsync(user => user.Id.ToString() == userId);
             if (user == null)
                 throw new InvalidOperationException("User Not Found");
 
@@ -121,7 +121,7 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<SuccessResponse> DeleteUser(string userId)
         {
-            var user = await _userRepo.GetSingleByAsync(user => user.Id.ToString() == userId);
+            ApplicationUser user = await _userRepo.GetSingleByAsync(user => user.Id.ToString() == userId);
             if (user == null)
                 throw new InvalidOperationException("User Not Found");
 
@@ -134,7 +134,7 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<SuccessResponse> LockUser(LockUserRequest request)
         {
-            var user = await _userManager.FindByIdAsync(request.UserId);
+            ApplicationUser user = await _userManager.FindByIdAsync(request.UserId);
             if (user == null)
                 throw new InvalidOperationException("User Not Found");
 
