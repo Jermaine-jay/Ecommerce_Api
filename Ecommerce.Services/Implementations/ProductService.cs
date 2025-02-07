@@ -16,34 +16,34 @@ namespace Ecommerce.Services.Implementations
 {
     public class ProductService : IProductService
     {
-        private readonly IRepository<Category> _categoryRepo;
+        private Settings _settings;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IRepository<Product> _productRepo;
+        private readonly IRepository<Category> _categoryRepo;
         private readonly IRepository<ProductImage> _productImagesRepo;
         private readonly IRepository<ProductVariation> _productVariationRepo;
-        private readonly IUnitOfWork _unitOfWork;
-        private Settings _settings;
 
 
         public ProductService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager)
         {
             _unitOfWork = unitOfWork;
-            _categoryRepo = _unitOfWork.GetRepository<Category>();
             _productRepo = _unitOfWork.GetRepository<Product>();
+            _categoryRepo = _unitOfWork.GetRepository<Category>();
             _productImagesRepo = _unitOfWork.GetRepository<ProductImage>();
             _productVariationRepo = _unitOfWork.GetRepository<ProductVariation>();
         }
 
         public async Task<CreateProductResponse> CreateProduct(CreateProductRequest request)
         {
-            var category = await _categoryRepo.GetSingleByAsync(p => p.Id.ToString() == request.CategoryId);
+            Category? category = await _categoryRepo.GetSingleByAsync(p => p.Id.ToString() == request.CategoryId);
             if (category == null)
                 throw new InvalidOperationException("Category doesn't exist");
 
-            var product = await _productRepo.GetSingleByAsync(p => p.Name == request.Name.ToLower());
+            Product product = await _productRepo.GetSingleByAsync(p => p.Name == request.Name.ToLower());
             if (product != null)
                 throw new InvalidOperationException("Product Name already exist");
 
-            var newProduct = new Product
+            Product? newProduct = new Product
             {
                 Name = request.Name.ToLower(),
                 Description = request.Description,
@@ -61,13 +61,13 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<ProductUpdateResponse> UpdateProduct(UpdateProductRequest request)
         {
-            var product = await _productRepo.GetSingleByAsync(u => u.Id.ToString() == request.ProductId);
+            Product product = await _productRepo.GetSingleByAsync(u => u.Id.ToString() == request.ProductId);
             if (product == null)
                 throw new InvalidOperationException("Product does not exist");
 
             if (request.CategoryName != null && request.CategoryName != "string")
             {
-                var category = await _categoryRepo.GetSingleByAsync(p => p.Name == request.CategoryName.ToLower());
+                Category category = await _categoryRepo.GetSingleByAsync(p => p.Name == request.CategoryName.ToLower());
                 if (category == null)
                     throw new InvalidOperationException("Category does not exist");
 
@@ -90,12 +90,12 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<SuccessResponse> DeleteProduct(string productId)
         {
-            var product = await _productRepo.GetSingleByAsync(u => u.Id.ToString() == productId, include: u => u.Include(p => p.ProductVariation));
+            Product product = await _productRepo.GetSingleByAsync(u => u.Id.ToString() == productId, include: u => u.Include(p => p.ProductVariation));
             if (product == null)
                 throw new InvalidOperationException("Product does not exist");
 
-            var productVariation = await _productVariationRepo.GetAllAsync(include: u => u.Include(p => p.ProductImages));
-            var allvar = productVariation.Where(u => u.ProductId.Equals(productId)).ToList();
+            IEnumerable<ProductVariation> productVariation = await _productVariationRepo.GetAllAsync(include: u => u.Include(p => p.ProductImages));
+            List<ProductVariation> allvar = productVariation.Where(u => u.ProductId.Equals(productId)).ToList();
 
             if (!allvar.Any())
                 throw new InvalidOperationException("None Found");
@@ -105,7 +105,7 @@ namespace Ecommerce.Services.Implementations
                             _settings.CloudinarySettings.ApiKey,
                             _settings.CloudinarySettings.ApiSecret));
 
-            var deletionParamsList = allvar.SelectMany(item => item.ProductImages.Select(image => new DeletionParams(image.PublicId))).ToList();
+            List<DeletionParams> deletionParamsList = allvar.SelectMany(item => item.ProductImages.Select(image => new DeletionParams(image.PublicId))).ToList();
             await Task.WhenAll(deletionParamsList.Select(param => cloudinary.DestroyAsync(param)));
 
             await _productRepo.DeleteAsync(product);
@@ -114,7 +114,7 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<SuccessResponse> UpdateStock(string productvariationId, int stock)
         {
-            var productv = await _productVariationRepo.GetSingleByAsync(u => u.Id.ToString() == productvariationId);
+            ProductVariation productv = await _productVariationRepo.GetSingleByAsync(u => u.Id.ToString() == productvariationId);
             if (productv == null)
                 throw new InvalidOperationException("Product does not exist");
 
@@ -148,7 +148,7 @@ namespace Ecommerce.Services.Implementations
                     continue;
 
                 await using var stream = file.OpenReadStream();
-                var uploadParams = new ImageUploadParams
+                ImageUploadParams uploadParams = new ImageUploadParams
                 {
                     File = new FileDescription(file.FileName, stream),
                     Transformation = new Transformation().Height(500).Width(500).Crop("fill")
@@ -156,7 +156,7 @@ namespace Ecommerce.Services.Implementations
                 var result = await cloudinary.UploadAsync(uploadParams);
                 uploadResults.Add(result);
 
-                var image = new ProductImage
+                ProductImage image = new ProductImage
                 {
                     ProductVariationId = productId,
                     PublicId = result.PublicId,
@@ -174,10 +174,10 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<SuccessResponse> AddVariations(ProductVarionRequest request)
         {
-            var product = await _productRepo.GetSingleByAsync(p => p.Id.ToString() == request.ProductId, include: u => u.Include(u => u.ProductVariation))
+            Product product = await _productRepo.GetSingleByAsync(p => p.Id.ToString() == request.ProductId, include: u => u.Include(u => u.ProductVariation))
                 ?? throw new InvalidOperationException("Product does not exist");
 
-            var colour = Colour.AsDisplayed;
+            Colour colour = Colour.AsDisplayed;
             switch (request.Colour)
             {
                 case (int)Colour.Blue:
@@ -228,11 +228,11 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<SuccessResponse> DeleteImage(string publicId)
         {
-            var image = await _productImagesRepo.GetSingleByAsync(image => image.PublicId == publicId, include: u => u.Include(p => p.ProductVariation));
+            ProductImage image = await _productImagesRepo.GetSingleByAsync(image => image.PublicId == publicId, include: u => u.Include(p => p.ProductVariation));
             if (image != null)
                 throw new InvalidOperationException("Image does not exist");
 
-            var param = new DeletionParams(image.PublicId) { };
+            DeletionParams param = new DeletionParams(image.PublicId) { };
             Cloudinary cloudinary = new(
                     new Account(_settings.CloudinarySettings.CloudName,
                             _settings.CloudinarySettings.ApiKey,
@@ -246,7 +246,7 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<IEnumerable<Product>> GetProductsAsync()
         {
-            var products = await _productRepo.GetAllAsync(include: u => u.Include(p => p.ProductVariation));
+            IEnumerable<Product> products = await _productRepo.GetAllAsync(include: u => u.Include(p => p.ProductVariation));
             if (products == null)
                 throw new InvalidOperationException("No Product Found");
 
@@ -273,10 +273,10 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<ProductDto> GetProductAsync(string productId)
         {
-            var product = await _productRepo.GetSingleByAsync(pro => pro.Id.ToString() == productId, include: u => u.Include(p => p.ProductVariation))
+            Product? product = await _productRepo.GetSingleByAsync(pro => pro.Id.ToString() == productId, include: u => u.Include(p => p.ProductVariation))
                 ?? throw new InvalidOperationException("No Product Found");
 
-            var variation = product.ProductVariation.FirstOrDefault()
+            ProductVariation? variation = product.ProductVariation.FirstOrDefault()
                 ?? throw new InvalidOperationException("No Product variation Found");
 
             return new ProductDto

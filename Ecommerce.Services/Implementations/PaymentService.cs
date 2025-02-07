@@ -7,19 +7,17 @@ namespace Ecommerce.Services.Implementations
     {
         private readonly IPaystackPaymentService _paystackPaymentService;
         private readonly IFlutterwavePaymentService _flutterwavePaymentService;
-        public PaymentService(IPaystackPaymentService paystackPaymentService, IFlutterwavePaymentService flutterwavePaymentService)
+        public PaymentService(IPaystackPaymentService paystackPaymentService, 
+            IFlutterwavePaymentService flutterwavePaymentService)
         {
             _paystackPaymentService = paystackPaymentService;
             _flutterwavePaymentService = flutterwavePaymentService;
         }
 
-
         public async Task<string> AvailableSystem()
         {
-            string payment = "";
-
-            var paystack = _paystackPaymentService.IsServiceUpAsync();
-            var flutter = _flutterwavePaymentService.IsServiceUpAsync();
+            Task<bool> paystack = _paystackPaymentService.IsServiceUpAsync();
+            Task<bool> flutter = _flutterwavePaymentService.IsServiceUpAsync();
 
             await Task.WhenAny(paystack, flutter);
 

@@ -35,7 +35,6 @@ namespace Ecommerce.Services.Implementations
             _userManager = userManager;
         }
 
-
         public async Task<FlutterTransactionResponse> FlutterPayment(string userId, FlutterPaymentRequest request)
         {
             Order order = await _orderRepo.GetSingleByAsync(order => order.Id.ToString() == request.OrderId, include: u => u.Include(u => u.OrderItems))
