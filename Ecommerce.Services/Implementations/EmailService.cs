@@ -43,7 +43,7 @@ namespace Ecommerce.Services.Implementations
 
             using (var client = new SmtpClient())
             {
-                client.Connect(_emailSenderOptions.SmtpServer, _emailSenderOptions.Port), true);
+                client.Connect(_emailSenderOptions.SmtpServer, _emailSenderOptions.Port, true);
                 client.Authenticate(_emailSenderOptions.Email, _emailSenderOptions.Password);
                 client.Send(message);
                 client.Disconnect(true);

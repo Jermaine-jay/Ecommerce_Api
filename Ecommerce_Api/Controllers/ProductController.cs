@@ -32,14 +32,14 @@ namespace Ecommerce_Api.Controllers
 
         [HttpPut("update-product", Name = "update-product")]
         [SwaggerOperation(Summary = "update existing product ")]
-        [SwaggerResponse(StatusCodes.Status201Created, Description = "Product", Type = typeof(SuccessResponse))]
+        [SwaggerResponse(StatusCodes.Status201Created, Description = "Product", Type = typeof(ProductUpdateResponse))]
         [SwaggerResponse(StatusCodes.Status404NotFound, Description = "Product doesn't exist", Type = typeof(ErrorResponse))]
         [SwaggerResponse(StatusCodes.Status404NotFound, Description = "category does not exist", Type = typeof(ErrorResponse))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, Description = "It's not you, it's us", Type = typeof(ErrorResponse))]
         public async Task<IActionResult> UpdateProduct([FromBody] UpdateProductRequest request)
         {
 
-            SuccessResponse response = await _productService.UpdateProduct(request);
+            ProductUpdateResponse response = await _productService.UpdateProduct(request);
             return Ok(response);
         }
 
