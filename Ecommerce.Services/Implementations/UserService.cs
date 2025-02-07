@@ -15,22 +15,20 @@ namespace Ecommerce.Services.Implementations
 {
     public class UserService : IUserService
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IRepository<ApplicationUser> _userRepo;
-        private readonly IRepository<ProductVariation> _productVariationRepo;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICacheService _cacheService;
-
+        private readonly IRepository<ApplicationUser> _userRepo;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IRepository<ProductVariation> _productVariationRepo;
 
         public UserService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _cacheService = cacheService;
-            _productVariationRepo = _unitOfWork.GetRepository<ProductVariation>();
             _userRepo = _unitOfWork.GetRepository<ApplicationUser>();
+            _productVariationRepo = _unitOfWork.GetRepository<ProductVariation>();
         }
-
 
         public async Task<SuccessResponse> ChangePassword(string userId, ChangePasswordRequest request)
         {
@@ -63,9 +61,9 @@ namespace Ecommerce.Services.Implementations
 
             return new ProfileResponse
             {
-                FirstName = user.FirstName,
-                LastName = user.LastName,
                 Email = user.Email,
+                LastName = user.LastName,
+                FirstName = user.FirstName,
                 PhoneNumber = user.PhoneNumber,
             };
         }
@@ -76,9 +74,9 @@ namespace Ecommerce.Services.Implementations
                 ?? throw new InvalidOperationException("User Not Found");
 
             user.Email = request.Email ?? user.Email;
-            user.PhoneNumber = request.PhoneNumber ?? user.PhoneNumber;
-            user.FirstName = request.FirstName ?? user.FirstName;
             user.LastName = request.LastName ?? user.LastName;
+            user.FirstName = request.FirstName ?? user.FirstName;
+            user.PhoneNumber = request.PhoneNumber ?? user.PhoneNumber;
 
             await _userManager.UpdateAsync(user);
             return new SuccessResponse
@@ -95,8 +93,7 @@ namespace Ecommerce.Services.Implementations
             var key = CacheKeySelector.UserCartCacheKey(user.Id.ToString());
             var cart = await _cacheService.ReadFromCache<Cart>(key)
                 ?? throw new InvalidOperationException("User cart Not Found");
-
-           
+      
             foreach(var item in cart.CartItems)
             {
                 var prod = await _productVariationRepo.GetAllAsync(include: u => u.Include(u => u.ProductImages));
@@ -106,7 +103,6 @@ namespace Ecommerce.Services.Implementations
                 await _cacheService.WriteToCache<Cart>(key, cart,null, TimeSpan.FromDays(365));          
             };
 
-
             if (cart?.CartItems != null)
             {
                 var result = new Cart
@@ -114,9 +110,9 @@ namespace Ecommerce.Services.Implementations
                     Id = cart.Id,
                     CartItems = cart.CartItems.OrderByDescending(u => u.CreatedAt).Select(u => new CartItem
                     {
+                        Colour = u.Colour,
                         Quantity = u.Quantity,
                         UnitPrice = u.UnitPrice,
-                        Colour = u.Colour,
                         ProductName = u.ProductName,
                         ProductImage = u.ProductImage,
                     }).ToList(),
@@ -135,7 +131,7 @@ namespace Ecommerce.Services.Implementations
             var key = CacheKeySelector.UserCartCacheKey(user.Id.ToString());
             var cart = await _cacheService.ReadFromCache<Cart>(key);
 
-            var productvar = await _productVariationRepo.GetSingleByAsync(u => u.ProductId.ToString().Equals(request.ProductId), include: img => img.Include(i => i.ProductImages))
+            var productvar = await _productVariationRepo.GetSingleByAsync(u => u.ProductId.ToString() == request.ProductId, include: img => img.Include(i => i.ProductImages))
                 ?? throw new InvalidOperationException("Product Not Found");
 
             var colour = Colour.AsDisplayed;
@@ -186,7 +182,6 @@ namespace Ecommerce.Services.Implementations
             }
 
             cart.CartItems.Add(cartitem);
-
 
             await _cacheService.WriteToCache(key, cart, null, TimeSpan.FromDays(365));
 

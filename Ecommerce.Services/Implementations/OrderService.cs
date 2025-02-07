@@ -5,8 +5,6 @@ using Ecommerce.Models.Entities;
 using Ecommerce.Services.Configurations.Cache.CacheServices;
 using Ecommerce.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
-using System.Text.Json.Serialization;
-using System.Text.Json;
 
 namespace Ecommerce.Services.Implementations
 {
@@ -29,7 +27,6 @@ namespace Ecommerce.Services.Implementations
             _variationRepo = _unitOfWork.GetRepository<ProductVariation>();
             _productRepo = _unitOfWork.GetRepository<Product>();
         }
-
 
         public async Task<SuccessResponse> ClearCart(string userId)
         {

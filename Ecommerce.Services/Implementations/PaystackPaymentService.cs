@@ -22,7 +22,6 @@ namespace Ecommerce.Services.Implementations
         private readonly IConfiguration _configuration;
         private readonly UserManager<ApplicationUser> _userManager;
 
-
         public PaystackPaymentService(IConfiguration configuration, IUnitOfWork unitOfWork,
             UserManager<ApplicationUser> userManager, PaystackConfig paystack)
         {
