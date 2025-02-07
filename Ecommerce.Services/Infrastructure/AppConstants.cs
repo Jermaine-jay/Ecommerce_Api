@@ -2,7 +2,7 @@
 {
     public class AppConstants
     {
-        public int AppUrl { get; set; }
+        public string AppUrl { get; set; }
         public int LoginAttempts { get; set; }
         public string CallbackUrl { get; set; }
         public string PaymentTitle { get; set; }

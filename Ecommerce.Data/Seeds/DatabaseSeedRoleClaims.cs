@@ -38,8 +38,6 @@ namespace Ecommerce.Data.Seeds
             }
         }
 
-
-
         private static async Task<ICollection<ApplicationRoleClaim>> UserClaim(ApplicationRole role)
         {
             return new List<ApplicationRoleClaim>()
@@ -138,7 +136,6 @@ namespace Ecommerce.Data.Seeds
 
             };
         }
-
 
         private static async Task<ICollection<ApplicationRoleClaim>> AdminClaim(ApplicationRole role)
         {
