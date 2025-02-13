@@ -11,13 +11,13 @@ namespace Ecommerce_Api.Controllers
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IOrderService _orderService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public OrderController(IHttpContextAccessor contextAccessor, IOrderService orderService)
         {
-            _httpContextAccessor = contextAccessor;
             _orderService = orderService;
+            _httpContextAccessor = contextAccessor;
         }
 
 
