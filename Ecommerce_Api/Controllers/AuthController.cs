@@ -16,8 +16,8 @@ namespace Ecommerce_Api.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IAuthServices _authServices;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly SignInManager<ApplicationUser> _signInManager;
         public AuthController(IAuthServices authServices, SignInManager<ApplicationUser> signInManager, IHttpContextAccessor httpContextAccessor)
         {
