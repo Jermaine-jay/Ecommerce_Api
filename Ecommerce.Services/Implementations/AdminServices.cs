@@ -11,10 +11,10 @@ namespace Ecommerce.Services.Implementations
 {
     public class AdminService : IAdminService
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IRepository<ApplicationUser> _userRepo;
-        private readonly IRepository<Category> _categoryRepo;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IRepository<Category> _categoryRepo;
+        private readonly IRepository<ApplicationUser> _userRepo;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public AdminService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager)
         {
