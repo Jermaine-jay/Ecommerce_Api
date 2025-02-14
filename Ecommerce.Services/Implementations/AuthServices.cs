@@ -291,7 +291,11 @@ namespace Ecommerce.Services.Implementations
 
                 await _cacheService.WriteToCache(key, cart, null, TimeSpan.FromDays(365));
 
-                string role = UserType.User.GetStringValue();
+                bool registerMail = await _emailService.RegistrationMail(user);
+                if (!registerMail)
+                    throw new InvalidOperationException($"Could not send verification mail");
+
+                string? role = UserType.User.GetStringValue();
                 bool roleExists = await _roleManager.RoleExistsAsync(role);
 
                 if (!roleExists)
