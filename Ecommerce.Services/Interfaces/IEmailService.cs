@@ -6,5 +6,6 @@ namespace Ecommerce.Services.Interfaces
     {
         Task<bool> SendEmailAsync(string email, string subject, string htmlMessage);
         Task<string> ResetPasswordMail(ApplicationUser user);
+        Task<bool> RegistrationMail(ApplicationUser user);
     }
 }

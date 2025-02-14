@@ -7,6 +7,7 @@ using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
+using Newtonsoft.Json;
 
 namespace Ecommerce.Services.Implementations
 {
@@ -14,26 +15,30 @@ namespace Ecommerce.Services.Implementations
     {
         private readonly IOtpService _otpService;
         private readonly AppConstants _appConstants;
+        private readonly ZeroBounceConfig _zeroBounce;
         private readonly IConfiguration _configuration;
+        private readonly IServiceFactory _serviceFactory;
         private readonly IGenerateEmailPage _generateEmailPage;
         private readonly EmailSenderOptions _emailSenderOptions;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public EmailService(IConfiguration configuration, IHttpContextAccessor httpContextAccessor, AppConstants appConstants,
-             IOtpService otpService, IGenerateEmailPage generateEmailPage, EmailSenderOptions emailSenderOptions)
+        public EmailService(IConfiguration configuration, IHttpContextAccessor httpContextAccessor,
+             IOtpService otpService, IServiceFactory serviceFactory)
         {
             _otpService = otpService;
-            _appConstants = appConstants;
             _configuration = configuration;
-            _generateEmailPage = generateEmailPage;
-            _emailSenderOptions = emailSenderOptions;
+            _serviceFactory = serviceFactory;
             _httpContextAccessor = httpContextAccessor;
+            _appConstants = _serviceFactory.GetService<AppConstants>();
+            _zeroBounce = _serviceFactory.GetService<ZeroBounceConfig>();
+            _generateEmailPage = _serviceFactory.GetService<IGenerateEmailPage>();
+            _emailSenderOptions = _serviceFactory.GetService<EmailSenderOptions>();
         }
 
         public async Task<bool> SendEmailAsync(string email, string subject, string htmlMessage)
         {
             MimeMessage message = new MimeMessage();
-            message.From.Add(new MailboxAddress("TaskManager", _emailSenderOptions.Username));
+            message.From.Add(new MailboxAddress("Ecommerce", _emailSenderOptions.Username));
             message.To.Add(new MailboxAddress(email, email));
             message.Subject = subject;
 
@@ -48,6 +53,36 @@ namespace Ecommerce.Services.Implementations
                 client.Send(message);
                 client.Disconnect(true);
             }
+
+            return true;
+        }
+
+
+        public async Task<bool> VerifyEmailAddress(string emailAddress)
+        {
+            using (var httpClient = new HttpClient())
+            {
+                string parameters = $"api_key={_zeroBounce.ApiKey}&email={emailAddress}";
+                HttpResponseMessage response = await httpClient.GetAsync($"{_zeroBounce.Url}?{parameters}");
+                response.EnsureSuccessStatusCode();
+
+                string responseContent = await response.Content.ReadAsStringAsync();
+                dynamic getResponse = JsonConvert.DeserializeObject<dynamic>(responseContent).status;
+                if (getResponse == "valid")
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        public async Task<bool> RegistrationMail(ApplicationUser user)
+        {
+            var page = _serviceFactory.GetService<IGenerateEmailPage>().EmailVerificationPage;
+            string validToken = await _serviceFactory.GetService<IOtpService>().GenerateUniqueOtpAsync(user.Id.ToString(), OtpOperation.EmailConfirmation);
+
+            string appUrl = $"{_appConstants.AppUrl}/api/Auth/confirm-email?token={validToken}";
+            await SendEmailAsync(user.Email, "Confirm your email", page(user.FirstName, appUrl));
 
             return true;
         }
