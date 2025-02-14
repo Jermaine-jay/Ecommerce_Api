@@ -29,10 +29,10 @@ namespace Ecommerce.Services.Implementations
         private readonly ILoginAttempt _loginAttempt;
         private readonly IEmailService _emailService;
         private readonly IServiceFactory _serviceFactory;
+        private readonly MicrosoftConfig _microsoftConfig;
         private readonly IJwtAuthenticator _jwtAuthenticator;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly MicrosoftConfig _microsoftConfig;
 
         public AuthServices(UserManager<ApplicationUser> userManager, MicrosoftConfig microsoftConfig,
             RoleManager<ApplicationRole> roleManager, HttpClient httpClient, AppConstants appConstants,

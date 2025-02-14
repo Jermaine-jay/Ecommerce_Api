@@ -17,22 +17,22 @@ namespace Ecommerce.Services.Implementations
     {
         private readonly HttpClient _httpClient;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly AppConstants _appConstants;
         private readonly IRepository<Order> _orderRepo;
         private readonly IConfiguration _configuration;
         private readonly FlutterwaveConfig _flutterwave;
-        private readonly AppConstants _appConstants;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public FlutterwavePaymentService(IUnitOfWork unitOfWork, IConfiguration configuration, IOrderService orderService,
             UserManager<ApplicationUser> userManager, FlutterwaveConfig flutterwave, AppConstants appConstants)
         {
             _unitOfWork = unitOfWork;
+            _flutterwave = flutterwave;
+            _userManager = userManager;
+            _appConstants = appConstants;
             _httpClient = new HttpClient();
             _configuration = configuration;
-            _flutterwave = flutterwave;
-            _appConstants = appConstants;
             _orderRepo = _unitOfWork.GetRepository<Order>();
-            _userManager = userManager;
         }
 
         public async Task<FlutterTransactionResponse> FlutterPayment(string userId, FlutterPaymentRequest request)
