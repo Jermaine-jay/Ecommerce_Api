@@ -35,14 +35,14 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<TransactionResponse> MakePayment(string userId, string orderId)
         {
-            var order = await _orderRepo.GetSingleByAsync(order => order.Id.ToString() == orderId)
+            Order order = await _orderRepo.GetSingleByAsync(order => order.Id.ToString() == orderId)
                 ?? throw new InvalidOperationException($"Order not found.");
 
-            var user = await _userManager.FindByIdAsync(userId)
+            ApplicationUser user = await _userManager.FindByIdAsync(userId)
                 ?? throw new InvalidOperationException($"User not found.");
 
-            var amount = Convert.ToInt32((order.Total * 10));
-            var Request = new TransactionInitializeRequest
+            int amount = Convert.ToInt32((order.Total * 10));
+            TransactionInitializeRequest Request = new TransactionInitializeRequest
             {
                 Reference = Guid.NewGuid().ToString(),
                 Bearer = user.FirstName,
@@ -54,9 +54,9 @@ namespace Ecommerce.Services.Implementations
             };
 
             PayStackApi payStack = new(_paystack.ApiKey);
-            var result = payStack.Transactions.Initialize(Request);
+            TransactionInitializeResponse result = payStack.Transactions.Initialize(Request);
 
-            var response = new TransactionResponse
+            TransactionResponse response = new()
             {
                 Message = result.Message,
                 Status = result.Status,
@@ -72,17 +72,17 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<VerifyTransactionResponse> VerifyPayment(string referenceCode)
         {
-            var order = await _orderRepo.GetAllAsync()
+            IEnumerable<Order> orders = await _orderRepo.GetAllAsync()
                   ?? throw new InvalidOperationException("Not Found");
-            var o = order.Where(o => o.Txnref.ToString() == referenceCode).FirstOrDefault();
+            Order? order = orders.Where(o => o.Txnref.ToString() == referenceCode).SingleOrDefault();
 
             PayStackApi payStack = new(_paystack.ApiKey);
             TransactionVerifyResponse result = payStack.Transactions.Verify(referenceCode);
             if (result.Data.Status == "success")
             {
-                o.Paid = true;
-                o.UpdatedAt = DateTime.UtcNow;
-                await _orderRepo.UpdateAsync(o);
+                order.Paid = true;
+                order.UpdatedAt = DateTime.UtcNow;
+                await _orderRepo.UpdateAsync(order);
             }
 
             var response = new VerifyTransactionResponse
@@ -99,15 +99,15 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<TransactionResponse> BankCharge(BankPaymentRequest request, string userId)
         {
-            var order = await _orderRepo.GetSingleByAsync(order => order.Id.ToString() == request.OrderId)
+            Order order = await _orderRepo.GetSingleByAsync(order => order.Id.ToString() == request.OrderId)
                 ?? throw new InvalidOperationException($"Order not found.");
 
-            var user = await _userManager.FindByIdAsync(userId)
+            ApplicationUser user = await _userManager.FindByIdAsync(userId)
                 ?? throw new InvalidOperationException($"User not found.");
 
             PayStackApi payStack = new(_paystack.ApiKey);
 
-            var bankChargeRequest = new BankChargeRequest
+            BankChargeRequest bankChargeRequest = new BankChargeRequest
             {
                 Email = user.Email,
                 Amount = order.Total.ToString(),
@@ -120,8 +120,8 @@ namespace Ecommerce.Services.Implementations
                 Reference = Guid.NewGuid().ToString(),
             };
 
-            var result = payStack.Charge.ChargeBank(bankChargeRequest, makeReferenceUnique: false);
-            var response = new TransactionResponse
+            ChargeResponse result = payStack.Charge.ChargeBank(bankChargeRequest, makeReferenceUnique: false);
+            TransactionResponse response = new TransactionResponse
             {
                 Message = result.Message,
                 Status = result.Status,
@@ -136,11 +136,11 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<ChargeResponse> VerifyBankCharge(string refrence, string otp)
         {
-            var order = await _orderRepo.GetSingleByAsync(order => order.Txnref.ToString() == refrence)
+            Order order = await _orderRepo.GetSingleByAsync(order => order.Txnref.ToString() == refrence)
               ?? throw new InvalidOperationException($"Order not found.");
 
             PayStackApi payStack = new(_paystack.ApiKey);
-            var result = payStack.Charge.SubmitOTP(refrence, otp);
+            ChargeResponse result = payStack.Charge.SubmitOTP(refrence, otp);
             if (result.Status)
             {
                 order.Paid = true;
@@ -154,14 +154,14 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<TransactionResponse> CardPayment(string userId, CardPaymentRequest request)
         {
-            var order = await _orderRepo.GetSingleByAsync(order => order.Id.ToString() == request.OrderId)
+            Order order = await _orderRepo.GetSingleByAsync(order => order.Id.ToString() == request.OrderId)
                 ?? throw new InvalidOperationException($"Order not found.");
 
-            var user = await _userManager.FindByIdAsync(userId)
+            ApplicationUser user = await _userManager.FindByIdAsync(userId)
                 ?? throw new InvalidOperationException($"User not found.");
 
             PayStackApi payStack = new PayStackApi(_paystack.ApiKey);
-            var cardChargeRequest = new CardChargeRequest
+            CardChargeRequest cardChargeRequest = new CardChargeRequest
             {
                 Email = user.Email,
                 Amount = order.Total.ToString(),
@@ -177,8 +177,8 @@ namespace Ecommerce.Services.Implementations
                 Reference = Guid.NewGuid().ToString(),
             };
 
-            var result = payStack.Charge.ChargeCard(cardChargeRequest, makeReferenceUnique: false);
-            var response = new TransactionResponse
+            ChargeResponse result = payStack.Charge.ChargeCard(cardChargeRequest, makeReferenceUnique: false);
+            TransactionResponse response = new TransactionResponse
             {
                 Message = result.Message,
                 Status = result.Status,
@@ -198,8 +198,8 @@ namespace Ecommerce.Services.Implementations
         public async Task<ResolveAccountResponse> GetAccount(string accountnumber, string bankcode)
         {
             PayStackApi payStack = new(_paystack.ApiKey);
-            var result = payStack.Miscellaneous.ResolveAccountNumber(accountnumber, bankcode);
-            var response = new ResolveAccountResponse
+            ResolveAccountNumberResponse result = payStack.Miscellaneous.ResolveAccountNumber(accountnumber, bankcode);
+            ResolveAccountResponse response = new()
             {
                 Status = result.Status,
                 Message = result.Message,
@@ -213,8 +213,8 @@ namespace Ecommerce.Services.Implementations
         public async Task<List<BankResponse>> ListBank()
         {
             PayStackApi payStack = new(_paystack.ApiKey);
-            var result = payStack.Miscellaneous.ListBanks();
-            var response = result.Data.Select(u => new BankResponse
+            ListBanksResponse result = payStack.Miscellaneous.ListBanks();
+            List<BankResponse> response = result.Data.Select(u => new BankResponse
             {
                 BankName = u.Name,
                 BankCode = u.Code,
@@ -226,7 +226,7 @@ namespace Ecommerce.Services.Implementations
         public async Task<bool> IsServiceUpAsync()
         {
             _httpClient.BaseAddress = new Uri("https://api.paystack.co/");
-            var response = await _httpClient.GetAsync("/healthcheck");
+            HttpResponseMessage response = await _httpClient.GetAsync("/healthcheck");
 
             PayStackApi payStack = new(_paystack.ApiKey);
             return response.IsSuccessStatusCode;
