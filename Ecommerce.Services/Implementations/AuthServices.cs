@@ -9,6 +9,7 @@ using Ecommerce.Services.Configurations.Cache.Security;
 using Ecommerce.Services.Extensions;
 using Ecommerce.Services.Interfaces;
 using Ecommerce.Services.Utilities;
+using Flutterwave.Net.Utilities;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
@@ -34,22 +35,21 @@ namespace Ecommerce.Services.Implementations
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public AuthServices(UserManager<ApplicationUser> userManager, MicrosoftConfig microsoftConfig,
-            RoleManager<ApplicationRole> roleManager, HttpClient httpClient, AppConstants appConstants,
-            FacebookConfig facebookConfig, GoogleConfig googleConfig, IServiceFactory serviceFactory)
+        public AuthServices(UserManager<ApplicationUser> userManager,
+            RoleManager<ApplicationRole> roleManager, HttpClient httpClient,IServiceFactory serviceFactory)
         {
             _httpClient = httpClient;
             _userManager = userManager;
             _roleManager = roleManager;
-            _appConstants = appConstants;
-            _googleConfig = googleConfig;
-            _facebookConfig = facebookConfig;
             _serviceFactory = serviceFactory;
-            _microsoftConfig = microsoftConfig;
             _otpService = _serviceFactory.GetService<IOtpService>();
+            _googleConfig = _serviceFactory.GetService<GoogleConfig>();
+            _appConstants = _serviceFactory.GetService<AppConstants>();
             _cacheService = _serviceFactory.GetService<ICacheService>();
             _loginAttempt = _serviceFactory.GetService<ILoginAttempt>();
             _emailService = _serviceFactory.GetService<IEmailService>();
+            _facebookConfig = _serviceFactory.GetService<FacebookConfig>();
+            _microsoftConfig = _serviceFactory.GetService<MicrosoftConfig>();
             _jwtAuthenticator = _serviceFactory.GetService<IJwtAuthenticator>();
         }
 
@@ -347,6 +347,10 @@ namespace Ecommerce.Services.Implementations
             ApplicationUser? emailExist = await _userManager.FindByNameAsync(request.Email);
             if (emailExist != null)
                 throw new InvalidOperationException($"User already exists");
+
+            bool verifyEmail = await _emailService.VerifyEmailAddress(request.Email);
+            if (!verifyEmail)
+                throw new InvalidOperationException($"Email {request.Email} is invalid");
 
             ApplicationUser user = new()
             {

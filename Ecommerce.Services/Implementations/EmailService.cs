@@ -22,13 +22,13 @@ namespace Ecommerce.Services.Implementations
         private readonly EmailSenderOptions _emailSenderOptions;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public EmailService(IConfiguration configuration, IHttpContextAccessor httpContextAccessor,
-             IOtpService otpService, IServiceFactory serviceFactory)
+        public EmailService(IConfiguration configuration, 
+            IHttpContextAccessor httpContextAccessor, IServiceFactory serviceFactory)
         {
-            _otpService = otpService;
             _configuration = configuration;
             _serviceFactory = serviceFactory;
             _httpContextAccessor = httpContextAccessor;
+            _otpService = _serviceFactory.GetService<IOtpService>();
             _appConstants = _serviceFactory.GetService<AppConstants>();
             _zeroBounce = _serviceFactory.GetService<ZeroBounceConfig>();
             _generateEmailPage = _serviceFactory.GetService<IGenerateEmailPage>();
