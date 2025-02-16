@@ -17,16 +17,16 @@ jobs:
           dotnet-version: 7.0
           
       - name: Install dependencies
-        run: dotnet restore
+        run: dotnet restore Ecommerce_Api.sln
         
       - name: Build
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build Ecommerce_Api.sln --configuration Release --no-restore
 
       - name: Publish
-        run: dotnet publish --configuration Release --output ./publish --runtime win-x86 
+        run: dotnet publish Ecommerce_Api/Ecommerce_Api.csproj --configuration Release --output ./publish --runtime win-x86 
         
       - name: Test with .NET
-        run: dotnet test
+        run: dotnet test Ecommerce_Api.sln
 
       - name: Deploy to MonsterASP.NET via WebDeploy
         uses: rasmusbuchholdt/simply-web-deploy@2.1.0
