@@ -1,10 +1,12 @@
 ﻿using Ecommerce.Models.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ecommerce.Data.Context
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string,
+     ApplicationUserClaim, ApplicationUserRole, IdentityUserLogin<string>, ApplicationRoleClaim, IdentityUserToken<string>>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
            : base(options)
@@ -13,6 +15,46 @@ namespace Ecommerce.Data.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<ApplicationUser>(b =>
+            {
+                b.Property(e => e.Id)
+                    .ValueGeneratedOnAdd();
+
+                b.HasMany(e => e.Claims)
+                    .WithOne()
+                    .HasForeignKey(uc => uc.UserId)
+                    .IsRequired();
+
+                b.HasMany(e => e.Logins)
+                    .WithOne()
+                    .HasForeignKey(ul => ul.UserId)
+                    .IsRequired();
+
+                b.HasMany(e => e.Tokens)
+                    .WithOne()
+                    .HasForeignKey(ut => ut.UserId)
+                    .IsRequired();
+
+                b.HasMany(e => e.UserRoles)
+                    .WithOne(e => e.User)
+                    .HasForeignKey(ur => ur.UserId)
+                    .IsRequired();
+
+            });
+
+            modelBuilder.Entity<ApplicationRole>(b =>
+            {
+                b.HasMany(e => e.UserRoles)
+                    .WithOne(e => e.Role)
+                    .HasForeignKey(ur => ur.RoleId)
+                    .IsRequired();
+
+                b.HasMany(e => e.RoleClaims)
+                    .WithOne(e => e.Role)
+                    .HasForeignKey(rc => rc.RoleId)
+                    .IsRequired();
+            });
+
             modelBuilder.Entity<ProductImage>(e =>
             {
                 e.HasKey(p => p.PublicId);
@@ -28,7 +70,6 @@ namespace Ecommerce.Data.Context
                 e.Property(e => e.Id)
                     .ValueGeneratedOnAdd();
             });
-
 
             modelBuilder.Entity<ProductVariation>(e =>
             {
@@ -101,10 +142,10 @@ namespace Ecommerce.Data.Context
             modelBuilder.Entity<ApplicationUser>(b =>
             {
                 b.HasMany<ApplicationUserRole>()
-               .WithOne()
-               .HasForeignKey(ur => ur.UserId)
-               .IsRequired()
-               .OnDelete(DeleteBehavior.Cascade);
+                   .WithOne()
+                   .HasForeignKey(ur => ur.UserId)
+                   .IsRequired()
+                   .OnDelete(DeleteBehavior.Cascade);
             });
 
             base.OnModelCreating(modelBuilder);

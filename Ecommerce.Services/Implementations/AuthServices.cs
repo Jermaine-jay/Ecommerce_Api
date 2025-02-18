@@ -84,7 +84,6 @@ namespace Ecommerce.Services.Implementations
             {
                 ApplicationUser newuser = new ApplicationUser
                 {
-                    Id = Guid.NewGuid(),
                     Email = payload.Email,
                     UserName = payload.Email,
                     FirstName = payload.GivenName,
@@ -179,7 +178,6 @@ namespace Ecommerce.Services.Implementations
             {
                 ApplicationUser newuser = new ApplicationUser
                 {
-                    Id = Guid.NewGuid(),
                     Email = payload.Email,
                     UserName = payload.Email,
                     FirstName = payload.FirstName,
@@ -268,7 +266,6 @@ namespace Ecommerce.Services.Implementations
                 string[] name = payload.Name.Split(' ');
                 ApplicationUser newuser = new ApplicationUser
                 {
-                    Id = Guid.NewGuid(),
                     Email = payload.Username,
                     UserName = payload.Username,
                     FirstName = name[0],
@@ -354,7 +351,6 @@ namespace Ecommerce.Services.Implementations
 
             ApplicationUser user = new()
             {
-                Id = Guid.NewGuid(),
                 Email = request.Email,
                 UserName = request.Email,
                 FirstName = request.Firstname,
