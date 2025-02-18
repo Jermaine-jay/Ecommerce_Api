@@ -10,7 +10,7 @@ namespace Ecommerce.Models.Entities
         public string? LastName { get; set; }
         public UserType UserType { get; set; }
         public bool Active { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; }
         public virtual ICollection<Order>? Orders { get; set; }
 

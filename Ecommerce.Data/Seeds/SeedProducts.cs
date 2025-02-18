@@ -36,7 +36,6 @@ namespace Ecommerce.Data.Seeds
             {
                 new Product()
                 {
-                    Id = Guid.NewGuid(),
                     Name = "Test",
                     Description = "Test",
                     ProductVariation = null

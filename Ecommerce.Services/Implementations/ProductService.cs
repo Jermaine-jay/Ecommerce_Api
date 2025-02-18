@@ -18,15 +18,16 @@ namespace Ecommerce.Services.Implementations
     {
         private Settings _settings;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly CloudinarySettings _cloudinarySettings;
         private readonly IRepository<Product> _productRepo;
         private readonly IRepository<Category> _categoryRepo;
         private readonly IRepository<ProductImage> _productImagesRepo;
         private readonly IRepository<ProductVariation> _productVariationRepo;
 
-
-        public ProductService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager)
+        public ProductService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, CloudinarySettings cloudinarySettings)
         {
             _unitOfWork = unitOfWork;
+            _cloudinarySettings = cloudinarySettings;
             _productRepo = _unitOfWork.GetRepository<Product>();
             _categoryRepo = _unitOfWork.GetRepository<Category>();
             _productImagesRepo = _unitOfWork.GetRepository<ProductImage>();
@@ -61,7 +62,7 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<ProductUpdateResponse> UpdateProduct(UpdateProductRequest request)
         {
-            Product product = await _productRepo.GetSingleByAsync(u => u.Id.ToString() == request.ProductId);
+            Product product = await _productRepo.GetSingleByAsync(u => u.Id == request.ProductId);
             if (product == null)
                 throw new InvalidOperationException("Product does not exist");
 
@@ -76,7 +77,7 @@ namespace Ecommerce.Services.Implementations
 
             product.Name = request.Name.ToLower() ?? product.Name;
             product.Description = request.Description ?? product.Description;
-            product.UpdatedAt = DateTime.UtcNow;
+            product.UpdatedAt = DateTime.Now;
 
             await _productRepo.UpdateAsync(product);
             return new ProductUpdateResponse
@@ -90,7 +91,7 @@ namespace Ecommerce.Services.Implementations
 
         public async Task<SuccessResponse> DeleteProduct(string productId)
         {
-            Product product = await _productRepo.GetSingleByAsync(u => u.Id.ToString() == productId, include: u => u.Include(p => p.ProductVariation));
+            Product product = await _productRepo.GetSingleByAsync(u => u.Id== productId, include: u => u.Include(p => p.ProductVariation));
             if (product == null)
                 throw new InvalidOperationException("Product does not exist");
 
@@ -128,15 +129,15 @@ namespace Ecommerce.Services.Implementations
             };
         }
 
-        public async Task<object> AddImages(Guid productId, List<IFormFile> files)
+        public async Task<object> AddImages(string productId, List<IFormFile> files)
         {
             if (files == null || !files.Any())
                 throw new InvalidOperationException("File cannot be empty");
 
             Cloudinary cloudinary = new(
-                    new Account(_settings.CloudinarySettings.CloudName,
-                            _settings.CloudinarySettings.ApiKey,
-                            _settings.CloudinarySettings.ApiSecret));
+                    new Account(_cloudinarySettings.CloudName,
+                            _cloudinarySettings.ApiKey,
+                            _cloudinarySettings.ApiSecret));
 
             if (cloudinary == null)
                 throw new InvalidOperationException("Invalid Cloud parameters");
@@ -207,7 +208,6 @@ namespace Ecommerce.Services.Implementations
 
             ProductVariation newVar = new ProductVariation
             {
-                Id = Guid.NewGuid(),
                 Colour = colour,
                 Price = request.Price,
                 StockQuantity = request.StockQuantity,
@@ -234,9 +234,9 @@ namespace Ecommerce.Services.Implementations
 
             DeletionParams param = new DeletionParams(image.PublicId) { };
             Cloudinary cloudinary = new(
-                    new Account(_settings.CloudinarySettings.CloudName,
-                            _settings.CloudinarySettings.ApiKey,
-                            _settings.CloudinarySettings.ApiSecret));
+                    new Account(_cloudinarySettings.CloudName,
+                            _cloudinarySettings.ApiKey,
+                            _cloudinarySettings.ApiSecret));
 
             await cloudinary.DestroyAsync(param);
             await _productImagesRepo.DeleteAsync(image);

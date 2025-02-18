@@ -81,7 +81,7 @@ namespace Ecommerce.Services.Implementations
             if (result.Data.Status == "success")
             {
                 order.Paid = true;
-                order.UpdatedAt = DateTime.UtcNow;
+                order.UpdatedAt = DateTime.Now;
                 await _orderRepo.UpdateAsync(order);
             }
 
@@ -144,7 +144,7 @@ namespace Ecommerce.Services.Implementations
             if (result.Status)
             {
                 order.Paid = true;
-                order.UpdatedAt = DateTime.UtcNow;
+                order.UpdatedAt = DateTime.Now;
                 await _orderRepo.UpdateAsync(order);
                 return result;
             }

@@ -12,7 +12,7 @@ namespace Ecommerce.Models.Entities
         public string? Type { get; set; }
         public string? Url { get; set; }
         public string? SecureUrl { get; set; }
-        public virtual Guid? ProductVariationId { get; set; }
+        public string? ProductVariationId { get; set; }
         public virtual ProductVariation? ProductVariation { get; set; }
     }
 }

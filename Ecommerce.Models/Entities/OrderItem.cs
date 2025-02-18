@@ -5,13 +5,12 @@ namespace Ecommerce.Models.Entities
 {
     public class OrderItem : BaseEntity
     {
+        public string Id { get; set; }
         public string? ProductName { get; set; }
         public Colour Colour { get; set; }
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
-        [JsonIgnore]
-        public Guid? OrderId { get; set; }
-        [JsonIgnore]
+        public string? OrderId { get; set; }
         public virtual Order Order { get; set; }
     }
 }

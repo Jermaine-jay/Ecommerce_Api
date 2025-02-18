@@ -40,16 +40,13 @@ namespace Ecommerce.Services.Implementations
 
             Order order = new Order
             {
-                ApplicationUserId = user.Id,
-                Id = Guid.NewGuid(),
-                CreatedAt = DateTime.UtcNow,
+                UserId = user.Id.ToString(),
                 UserName = $"{user.FirstName} {user.LastName}",
                 Total = cart.CartItems.Sum(u => u.UnitPrice * u.Quantity),
                 Received = false,
                 Paid = false,
                 OrderItems = cart.CartItems.Select(item => new OrderItem
                 {
-                    Id = Guid.NewGuid(),
                     ProductName = item.ProductName ?? "Unknown Product",
                     Colour = item.Colour,
                     Quantity = item.Quantity,
@@ -79,25 +76,21 @@ namespace Ecommerce.Services.Implementations
             ProductVariation variation = await _variationRepo.GetSingleByAsync(pv => pv.Id.Equals(request.VariationId))
                 ?? throw new InvalidOperationException("product does not exist");
 
-            var id = Guid.NewGuid();
             OrderItem orderItems = new OrderItem
             {
                 ProductName = variation.Product.Name,
                 Colour = variation.Colour,
                 Quantity = request.Quantity,
                 UnitPrice = variation.Price,
-                OrderId = id,
             };
 
             Order order = new Order
             {
-                Id = id,
-                CreatedAt = DateTime.UtcNow,
                 UserName = $"{user.FirstName} {user.LastName}",
                 Total = variation.Price * request.Quantity,
                 Received = false,
                 Paid = false,
-                ApplicationUserId = user.Id,
+                UserId = user.Id.ToString(),
                 OrderItems = new List<OrderItem>()
                 {
                     orderItems
@@ -136,7 +129,6 @@ namespace Ecommerce.Services.Implementations
             };
 
             order.ShippingAddress = address;
-            order.UpdatedAt = DateTime.UtcNow;
             await _orderRepo.UpdateAsync(order);
 
             return new OrderResponse
