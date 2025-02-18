@@ -54,7 +54,7 @@ namespace Ecommerce_Api.Extensions
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseLazyLoadingProxies();
-                options.UseNpgsql(connectionString, s =>
+                options.UseSqlServer(connectionString, s =>
                 {
                     s.MigrationsAssembly("Ecommerce.Migrations");
                     s.EnableRetryOnFailure(3);

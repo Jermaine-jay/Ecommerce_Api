@@ -16,8 +16,8 @@ namespace Ecommerce.Services.Implementations
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IRepository<ApplicationRoleClaim> _roleClaimRepo;
 
-
-        public RoleService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
+        public RoleService(IUnitOfWork unitOfWork, 
+            UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
         {
             ;
             _unitOfWork = unitOfWork;
@@ -26,7 +26,6 @@ namespace Ecommerce.Services.Implementations
             _roleRepo = _unitOfWork.GetRepository<ApplicationRole>();
             _roleClaimRepo = _unitOfWork.GetRepository<ApplicationRoleClaim>();
         }
-
 
         public async Task<AddUserToRoleResponse> AddUserToRole(AddUserToRoleRequest request)
         {
@@ -68,7 +67,6 @@ namespace Ecommerce.Services.Implementations
             };
         }
 
-
         public async Task<SuccessResponse> DeleteRole(string name)
         {
             ApplicationRole? role = await _roleManager.FindByNameAsync(name.Trim().ToLower());
@@ -82,7 +80,6 @@ namespace Ecommerce.Services.Implementations
                 Success = true
             };
         }
-
 
         public async Task<SuccessResponse> EditRole(string id, string Name)
         {
@@ -98,7 +95,6 @@ namespace Ecommerce.Services.Implementations
                 Success = true
             };
         }
-
 
         public async Task<SuccessResponse> RemoveUserFromRole(AddUserToRoleRequest request)
         {
@@ -123,7 +119,6 @@ namespace Ecommerce.Services.Implementations
             };
         }
 
-
         public async Task<IEnumerable<string>> GetUserRoles(string userName)
         {
             ApplicationUser? user = await _userManager.FindByNameAsync(userName);
@@ -138,7 +133,6 @@ namespace Ecommerce.Services.Implementations
 
             return userRoles;
         }
-
 
         public async Task<IEnumerable<RoleResponse>> GetAllRoles()
         {

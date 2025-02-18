@@ -1,8 +1,8 @@
 ﻿using Ecommerce.Data.Interfaces;
-using Ecommerce.Models.Dtos.Requests;
-using Ecommerce.Models.Dtos.Responses;
 using Ecommerce.Models.Entities;
 using Ecommerce.Services.Interfaces;
+using Ecommerce.Models.Dtos.Requests;
+using Ecommerce.Models.Dtos.Responses;
 
 namespace TaskManager.Services.Implementations
 {
@@ -10,16 +10,15 @@ namespace TaskManager.Services.Implementations
     public class RoleClaimService : IRoleClaimService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IRepository<ApplicationRoleClaim> _roleClaimRepo;
         private readonly IRepository<ApplicationRole> _roleRepo;
+        private readonly IRepository<ApplicationRoleClaim> _roleClaimRepo;
 
         public RoleClaimService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _roleClaimRepo = _unitOfWork.GetRepository<ApplicationRoleClaim>();
             _roleRepo = _unitOfWork.GetRepository<ApplicationRole>();
+            _roleClaimRepo = _unitOfWork.GetRepository<ApplicationRoleClaim>();
         }
-
 
         public async Task<RoleClaimResponse> AddClaim(RoleClaimRequest request)
         {
