@@ -126,7 +126,7 @@ app.MapControllers();
 
 await app.SeedRole();
 await app.ClaimSeeder();
-//await app.ProductSeeder();
-//await app.SeededUserAsync();
+await app.ProductSeeder();
+await app.SeededUserAsync();
 
 app.Run();
