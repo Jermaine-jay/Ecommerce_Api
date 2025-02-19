@@ -89,7 +89,6 @@ namespace Ecommerce.Services.Implementations
                 EmailConfirmed = user.EmailConfirmed ? "Confirmed" : "Not Confirmed",
                 LockedOut = user.LockoutEnd?.ToString("dd MMMM yyyy"),
                 CreatedAt = user.CreatedAt.ToString("dd MMMM yyyy"),
-                UpdatedAt = user.UpdatedAt.ToString("dd MMMM yyyy"),
             });
 
             return new SuccessResponse
@@ -115,7 +114,6 @@ namespace Ecommerce.Services.Implementations
                 EmailConfirmed = user.EmailConfirmed ? "Confirmed" : "Not Confirmed",
                 LockedOut = user.LockoutEnd?.ToString("dd MMMM yyyy HH:mm:ss"),
                 CreatedAt = user.CreatedAt.ToString("dd MMMM yyyy HH:mm:ss"),
-                UpdatedAt = user.UpdatedAt.ToString("dd MMMM yyyy HH:mm:ss"),
             };
         }
 

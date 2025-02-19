@@ -20,10 +20,10 @@ namespace Ecommerce.Data.Context
                 b.Property(e => e.Id)
                     .ValueGeneratedOnAdd();
 
-                b.HasMany(e => e.Claims)
-                    .WithOne()
-                    .HasForeignKey(uc => uc.UserId)
-                    .IsRequired();
+                //b.HasMany(e => e.Claims)
+                //    .WithOne()
+                //    .HasForeignKey(uc => uc.UserId)
+                //    .IsRequired();
 
                 b.HasMany(e => e.Logins)
                     .WithOne()
@@ -35,25 +35,25 @@ namespace Ecommerce.Data.Context
                     .HasForeignKey(ut => ut.UserId)
                     .IsRequired();
 
-                b.HasMany(e => e.UserRoles)
-                    .WithOne(e => e.User)
-                    .HasForeignKey(ur => ur.UserId)
-                    .IsRequired();
+                //b.HasMany(e => e.UserRoles)
+                //    .WithOne(e => e.User)
+                //    .HasForeignKey(ur => ur.UserId)
+                //    .IsRequired();
 
             });
 
-            modelBuilder.Entity<ApplicationRole>(b =>
-            {
-                b.HasMany(e => e.UserRoles)
-                    .WithOne(e => e.Role)
-                    .HasForeignKey(ur => ur.RoleId)
-                    .IsRequired();
+            //modelBuilder.Entity<ApplicationRole>(b =>
+            //{
+            //    //b.HasMany(e => e.UserRoles)
+            //    //    .WithOne(e => e.Role)
+            //    //    .HasForeignKey(ur => ur.RoleId)
+            //    //    .IsRequired();
 
-                b.HasMany(e => e.RoleClaims)
-                    .WithOne(e => e.Role)
-                    .HasForeignKey(rc => rc.RoleId)
-                    .IsRequired();
-            });
+            //    b.HasMany(e => e.RoleClaims)
+            //        .WithOne(e => e.Role)
+            //        .HasForeignKey(rc => rc.RoleId)
+            //        .IsRequired();
+            //});
 
             modelBuilder.Entity<ProductImage>(e =>
             {
@@ -93,9 +93,11 @@ namespace Ecommerce.Data.Context
             modelBuilder.Entity<Product>(entity =>
             {
                 entity.HasMany(ci => ci.ProductVariation)
-                .WithOne(p => p.Product)
-                .HasForeignKey(ci => ci.ProductId)
-                .OnDelete(DeleteBehavior.Cascade);
+                    .WithOne(p => p.Product)
+                    .HasForeignKey(ci => ci.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(x => x.Id).IsUnique();
 
                 entity.Property(e => e.Id)
                     .ValueGeneratedOnAdd();
@@ -108,6 +110,23 @@ namespace Ecommerce.Data.Context
                     .WithOne(p => p.Order)
                     .HasForeignKey(ci => ci.OrderId)
                     .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(x => x.Txnref).IsUnique();
+
+                entity.HasIndex(x => x.Id).IsUnique();
+
+                entity.Property(o => o.Total)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(e => e.Id)
+                    .ValueGeneratedOnAdd();
+            });
+
+            modelBuilder.Entity<OrderItem>(entity =>
+            {
+                entity.Property(o => o.UnitPrice)
+                    .HasColumnType("decimal(18,2)");
+
                 entity.Property(e => e.Id)
                     .ValueGeneratedOnAdd();
             });
@@ -122,41 +141,51 @@ namespace Ecommerce.Data.Context
             modelBuilder.Entity<Category>(e =>
             {
                 e.HasMany(oi => oi.Products)
-                .WithOne(o => o.Category)
-                .HasForeignKey(oi => oi.CategoryId)
-                .OnDelete(DeleteBehavior.Restrict);
+                    .WithOne(o => o.Category)
+                    .HasForeignKey(oi => oi.CategoryId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
                 e.Property(e => e.Id)
                     .ValueGeneratedOnAdd();
             });
 
-            modelBuilder.Entity<ApplicationRole>(b =>
-            {
-                b.HasMany<ApplicationUserRole>()
-                .WithOne()
-                .HasForeignKey(ur => ur.RoleId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.NoAction);
-            });
+            /*   modelBuilder.Entity<ApplicationUserRole>(entity =>
+               {
+                   entity.HasKey(ur => new { ur.UserId, ur.RoleId });
 
-            modelBuilder.Entity<ApplicationUser>(b =>
+                   entity.HasOne(ur => ur.User)
+                       .WithMany(u => u.UserRoles)
+                       .HasForeignKey(ur => ur.UserId)
+                       .IsRequired();
+
+                   entity.HasOne(ur => ur.Role)
+                       .WithMany(r => r.UserRoles)
+                       .HasForeignKey(ur => ur.RoleId)
+                       .IsRequired();
+               });*/
+
+            //modelBuilder.Entity<ApplicationRoleClaim>(entity =>
+            //{
+            //    entity.HasOne(rc => rc.Role)
+            //        .WithMany(r => r.RoleClaims)
+            //        .HasForeignKey(rc => rc.RoleId) // Explicitly specify the foreign key
+            //        .IsRequired();
+            //});
+
+            modelBuilder.Entity<AuditTrail>(entity =>
             {
-                b.HasMany<ApplicationUserRole>()
-                   .WithOne()
-                   .HasForeignKey(ur => ur.UserId)
-                   .IsRequired()
-                   .OnDelete(DeleteBehavior.Cascade);
+                entity.Property(x => x.Id).ValueGeneratedOnAdd();
             });
 
             base.OnModelCreating(modelBuilder);
         }
 
-        public DbSet<Product> Products { get; set; }
-        public DbSet<Order> Orders { get; set; }
-        public DbSet<OrderItem> OrderItems { get; set; }
-        public DbSet<Category> Categories { get; set; }
-        public DbSet<ProductImage> ProductImages { get; set; }
-        public DbSet<ProductVariation> ProductVariations { get; set; }
-        public DbSet<ShippingAddress> ShippingAddresses { get; set; }
+        public virtual DbSet<Order> Orders { get; set; }
+        public virtual DbSet<Product> Products { get; set; }
+        public virtual DbSet<Category> Categories { get; set; }
+        public virtual DbSet<OrderItem> OrderItems { get; set; }
+        public virtual DbSet<ProductImage> ProductImages { get; set; }
+        public virtual DbSet<ShippingAddress> ShippingAddresses { get; set; }
+        public virtual DbSet<ProductVariation> ProductVariations { get; set; }
     }
 }
