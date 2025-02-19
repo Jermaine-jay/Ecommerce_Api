@@ -165,16 +165,13 @@ namespace Ecommerce.Services.Implementations
 
             CartItem cartitem = new CartItem
             {
-                Id = Guid.NewGuid(),
                 ProductId = productvar.Id.ToString(),
                 ProductImage = productvar.ProductImages.FirstOrDefault().Url,
                 ProductName = productvar.Product.Name,
-                CartId = cart.Id,
+                CartId = cart.Id.ToString(),
                 Quantity = request.Quantity,
                 Colour = colour,
                 UnitPrice = productvar.Price,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
             };
 
             if (cart.CartItems == null)

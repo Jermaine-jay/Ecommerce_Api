@@ -35,21 +35,18 @@ namespace TaskManager.Data.Seeds
                 new ApplicationRole()
                 {
                     Name = UserTypeExtension.GetStringValue(UserType.User),
-                    Type = UserType.User,
                     NormalizedName = UserTypeExtension.GetStringValue(UserType.User)?.ToUpper()
                                                       .Normalize()
                 },
                 new ApplicationRole()
                 {
                     Name = UserTypeExtension.GetStringValue(UserType.Admin),
-                    Type = UserType.Admin,
                     NormalizedName = UserTypeExtension.GetStringValue(UserType.Admin)?.ToUpper()
                                                       .Normalize()
                 },
                 new ApplicationRole
                 {
                     Name = UserTypeExtension.GetStringValue(UserType.SuperAdmin),
-                    Type = UserType.SuperAdmin,
                     NormalizedName = UserTypeExtension.GetStringValue(UserType.SuperAdmin)?.ToUpper()
                                                       .Normalize()
                 }

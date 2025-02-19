@@ -86,7 +86,7 @@ namespace Ecommerce.Services.Implementations
             if (result.Status == "successful")
             {
                 order.Paid = true;
-                order.UpdatedAt = DateTime.UtcNow;
+                order.UpdatedAt = DateTime.Now;
                 await _orderRepo.UpdateAsync(order);
             }
 

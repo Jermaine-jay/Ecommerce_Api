@@ -1,13 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ecommerce.Models.Entities
 {
-    public class ApplicationUserRole : IdentityUserRole<Guid>
+    public class ApplicationUserRole : IdentityUserRole<string>
     {
+        public bool Active { get; set; } = true;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime? UpdatedAt { get; set; }
+        
     }
 }

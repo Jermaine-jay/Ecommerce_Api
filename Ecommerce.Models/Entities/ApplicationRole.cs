@@ -3,21 +3,12 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Ecommerce.Models.Entities
 {
-    public class ApplicationRole : IdentityRole<Guid>
+    public class ApplicationRole : IdentityRole
     {
-        public ApplicationRole(string role) : base(role)
-        {
-
-        }
-
-        public ApplicationRole()
-        {
-
-        }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime? UpdatedAt { get; set; }
         public bool Active { get; set; } = true;
-        public UserType Type { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime? UpdatedAt { get; set; }
+        public virtual ICollection<ApplicationUserRole> UserRoles { get; set; }
         public virtual ICollection<ApplicationRoleClaim> RoleClaims { get; set; }
 
     }

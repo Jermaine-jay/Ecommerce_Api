@@ -7,31 +7,26 @@ services:
     image: redis:latest
     ports:
       - "6379:6379"
-
-  app_db:
-    image: postgres:latest
-    container_name: app_db
-    environment:
-      - POSTGRES_USER=ecommercedb_wzz4_user
-      - POSTGRES_PASSWORD=fbM9t6zRwNP1vxwsNniPgTMi0G48FBeX
-      - POSTGRES_DB=ecommercedb_wzz4
+  
+  mssql:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    container_name: sql_server2022
     ports:
-      - 5432:5433
+      - "1432:1433"
 
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=
+     
     restart: always
-
 
   ecommerce_api:
     image: ${DOCKER_REGISTRY-}ecommerceapi
     build:
       context: .
       dockerfile: Ecommerce_Api/Dockerfile
- 
     depends_on:
-        - "app_db"
-    environment: 
-         - ConnectionStrings:DefaultConnection="Host=dpg-cr6rnqqj1k6c73da71bg-a.oregon-postgres.render.com;Database=ecommercedb_wzz4;Username=ecommercedb_wzz4_user;Password=fbM9t6zRwNP1vxwsNniPgTMi0G48FBeX;Port=5432;"
-         - ASPNETCORE_URLS=http://+80;
+    - "mssql"
 
 
 
